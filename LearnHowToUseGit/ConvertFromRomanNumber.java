@@ -24,7 +24,7 @@ public class ConvertFromRomanNumber {
 
 		for (i = 0; i < romanNum.length(); i++) {
 			current = syntaxRomanNumber(Character.toString(romanNum.charAt(i)));
-			decimaNum += previous > 0 && previous < current ? -2*previous + current : current;
+			decimaNum += previous > 0 && previous < current ? -2 * previous + current : current;
 			previous = current;
 		}
 		System.out.println(decimaNum);
@@ -41,6 +41,17 @@ public class ConvertFromRomanNumber {
 		System.out.println("############## test 3 #############");
 		romanNumber("MMCCLXVI");
 
+		System.out.println("############## test 4 #############");
+		romanNumber("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMCCCXXIII");
+
+		System.out.println("############## test 5 #############");
+		romanNumber("CDXXII");
+
+		System.out.println("############## test 6 #############");
+		romanNumber("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMXII");
+
+		System.out.println("############## test 7 #############");
+		romanNumber("MMMMMMMMMMMMCCCXII");
 	}
 
 }
