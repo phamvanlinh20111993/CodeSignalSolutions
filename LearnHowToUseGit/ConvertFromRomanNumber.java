@@ -14,7 +14,6 @@ public class ConvertFromRomanNumber {
 		romanBase.put("C", 100);
 		romanBase.put("D", 500);
 		romanBase.put("M", 1000);
-		romanBase.put("I", 1);
 		return romanBase.containsKey(syntax) ? romanBase.get(syntax) : -1;
 
 	}
