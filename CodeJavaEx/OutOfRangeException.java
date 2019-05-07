@@ -1,5 +1,9 @@
 package CodeJavaEx;
-
+/**
+ * 
+ * @author PhamVanLinh
+ *
+ */
 class OutOfRangeException extends Exception {
 
 	/**
