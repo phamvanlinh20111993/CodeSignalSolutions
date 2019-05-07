@@ -120,11 +120,7 @@ class ConvertNumberToRomanNumer implements ConvertDashBoardToRomanNumber {
 		}
 		number -= spitNumber * positionVal;
 
-		if (i == 0) {
-			return value;
-		} else {
-			return value + calRomanNumber(number, i);
-		}
+		return i == 0  ? value : value + calRomanNumber(number, i);
 	}
 
 	/**

@@ -54,7 +54,7 @@ class ConvertNumberToBinaryNumber implements ConvertDashboardNumberToBase {
 		if (number instanceof Integer) {
 			tmp = Integer.toString((Integer) number);
 		} else if (number instanceof Long) {
-			tmp = Long.toString((Integer) number);
+			tmp = Long.toString((Long) number);
 		} else if (number instanceof Float) {
 			tmp = Float.toString((Float) number);
 		} else if (number instanceof Double) {
