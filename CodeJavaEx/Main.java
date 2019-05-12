@@ -88,6 +88,9 @@ public class Main {
 		for (int i = -1; i <= 2999; i++) {
 			System.out.println(i + " = " + test.converNumberToRomanNumber(i));
 		}
+		
+		System.out.println("############# test 7, 2231312 ####################");
+		System.out.println(test.converNumberToRomanNumber("2231312"));
 	}
 
 }

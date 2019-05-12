@@ -46,9 +46,7 @@ public class CombinationSum {
 				else {
 					String tmp = saveNum.get(a[i]);
 					saveNum.put(a[i], tmp.substring(0, tmp.length() - 2));
-
 				}
-
 			}
 		}
 	}
