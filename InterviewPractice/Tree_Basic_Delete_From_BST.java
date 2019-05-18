@@ -37,25 +37,30 @@ public class Tree_Basic_Delete_From_BST {
 				} else
 				// if current have a child left
 				if (current.left != null) {
-					Tree<Integer> getChildRightLastedt = current.left;
-					previous = getChildRightLastedt;
-					while (getChildRightLastedt != null && getChildRightLastedt.right != null) {
-						previous = getChildRightLastedt;
-						getChildRightLastedt = getChildRightLastedt.right;
+					Tree<Integer> getChildRightLastest = current.left;
+					previous = getChildRightLastest;
+					while (getChildRightLastest != null && getChildRightLastest.right != null) {
+						previous = getChildRightLastest;
+						getChildRightLastest = getChildRightLastest.right;
 					}
-
-					current.value = getChildRightLastedt.value;
-					if (getChildRightLastedt.value == previous.value) {
-						current.left = getChildRightLastedt.left;
+				
+					current.value = getChildRightLastest.value;	
+					if (getChildRightLastest.value == previous.value) {
+						current.left = getChildRightLastest.left;
 					} else {
-						previous.right = null;
+						//the rightmost have a subtree in left
+						if(getChildRightLastest.left != null) {
+							previous.right = getChildRightLastest.left;
+						}else {
+							previous.right = null;
+						}
 					}
 					// if current do not have any child left but have a child right
 				} else {
 					// is root
 					if (previous.value == current.value) {
 						previous.value = current.right.value;
-						previous.right = null;
+						previous.right = previous.right.right;
 					} else {
 						if(previous.right != null && previous.right.value == current.value)
 							previous.right = current.right;
@@ -71,6 +76,7 @@ public class Tree_Basic_Delete_From_BST {
 
 	public static void main(String[] args) {
 		BinaryTree binaryTree = new BinaryTree();
+		Tree<Integer> val = null;
 		// 3 2 1 8 7
 		System.out.println("############## Test 1 #############");
 		binaryTree.constructBinaryTreeByListValue(new int[] { 5, 2, 1, 3, 6, 8, 7 });
@@ -96,7 +102,7 @@ public class Tree_Basic_Delete_From_BST {
 		binaryTree = new BinaryTree();
 		binaryTree.constructBinaryTreeByListValue(new int[] { 3, 2 });
 		int[] queries2 = { 1, 2, 3, 5 };
-		Tree<Integer> val = deleteFromBST(binaryTree.getTree(), queries2);
+		val = deleteFromBST(binaryTree.getTree(), queries2);
 		binaryTree.preOrderBinaryTree(val);
 		// null
 		System.out.println("############## Test 4 #############");
@@ -127,6 +133,42 @@ public class Tree_Basic_Delete_From_BST {
 		int[] queries7 = { 1 };
 		val = deleteFromBST(binaryTree.getTree(), queries7);
 		binaryTree.preOrderBinaryTree(val);
+		
+		/**
+		 *                                                   50
+         *                       20                                                         100 
+         *                 10           40                                         66                 120
+         *              9     12    24       44                                65       98       119        150
+         *                      14        42    45                          64       97    99           140     
+         *                         16               46                  63                          139
+         *                     15                       47                                       138
+         *                                                  48 
+         *                                                      49
+		 */                           
+		System.out.println("############## Test 8 #############");
+		binaryTree = new BinaryTree();
+		binaryTree.constructBinaryTreeByListValue(new int[] { 50, 20, 100, 10, 40, 9, 12, 44, 24, 14, 15, 16, 42, 45,
+				46, 47, 48, 49, 66, 65, 64, 63, 98, 99, 97, 120, 119, 150, 140, 139, 138 });
+		int[] queries8 = {49};//is bug ??? tomorrow is get
+		val = deleteFromBST(binaryTree.getTree(), queries8);
+		binaryTree.preOrderBinaryTree(val);
+		
+		//3 1 2
+		System.out.println("############## Test 9 #############");
+		binaryTree = new BinaryTree();
+		binaryTree.constructBinaryTreeByListValue(new int[] {4, 1, 3, 2});
+		int[] queries9 = {4};//is bug ??? tomorrow is get
+		val = deleteFromBST(binaryTree.getTree(), queries9);
+		binaryTree.preOrderBinaryTree(val);
+
+		System.out.println("############## Test 10 #############");
+		binaryTree = new BinaryTree();
+		binaryTree.constructBinaryTreeByListValue(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14 });
+		int[] queries10 = { 4, 1};// is bug ??? tomorrow is get
+		val = deleteFromBST(binaryTree.getTree(), queries10);
+		binaryTree.preOrderBinaryTree(val);
+
+		System.out.println();
 	}
 
 }
