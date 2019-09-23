@@ -1,17 +1,12 @@
 package CompanyChallenge;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.TimeZone;
 
-public class Kik_RateLimit {
+public class Kik_RateLimit1 {
 
 	static int[] rateLimit(int[][] sentBatches, int[][] receivedMessages, int startingAllowance) {
-
-		HashMap<Integer, Integer> users = new HashMap<>(),
-		                          times = new HashMap<>();
+		HashMap<Integer, Integer> users = new HashMap<>(), times = new HashMap<>();
 		int i = 0, j = 0, k = 0;
 		ArrayList<Integer> re = new ArrayList<>();
 		boolean isFull = false;
@@ -22,117 +17,9 @@ public class Kik_RateLimit {
 				users.put(sentBatches[i][j], startingAllowance);
 			}
 		}
-		for (k = 0; k < receivedMessages.length; k++) {
-			users.put(receivedMessages[k][1], startingAllowance);
-		}
-
-		// start
-		j = 0;
-		for (i = 0; i < sentBatches.length; i++) {
-			// check timestamp is 00:00?
-			Date date = new Date((long) sentBatches[i][0] * 1000);
-			TimeZone tz = TimeZone.getTimeZone("GMT+00");
-			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-			sdf.setTimeZone(tz);
-			String[] time = sdf.format(date).toString().split(":");
-
-			int hour = Integer.parseInt(time[0]);
-			int minute = Integer.parseInt(time[1]);
-			int second = Integer.parseInt(time[2]);
-
-			// reset ratelimit
-			if (hour == 0 && minute == 0 && second == 0) {
-				if (!isFull) {
-					while (j < receivedMessages.length && receivedMessages[j][0] < sentBatches[i][0]) {
-						users.put(receivedMessages[j][1], users.get(receivedMessages[j][1]) + 1);
-						j++;
-					}
-				}
-
-				if (j == receivedMessages.length) {
-					isFull = true;
-					j--;
-				}
-				if (times.get(sentBatches[i][0]) == null) {
-					for (Integer temp : users.keySet()) {
-						users.put(temp, startingAllowance);
-					}
-					times.put(sentBatches[i][0], 1);
-				}
-			}
-
-			// caculator add batch with index = 0
-			boolean isAdd = true;
-
-			if (sentBatches[i][0] < receivedMessages[j][0]) {
-				for (k = 1; k < sentBatches[i].length; k++) {
-					if (users.get(sentBatches[i][k]) <= 0) {
-						isAdd = false;
-						break;
-					}
-				}
-
-				if (isAdd) {
-					for (k = 1; k < sentBatches[i].length; k++) {
-						users.put(sentBatches[i][k], users.get(sentBatches[i][k]) - 1);
-					}
-				} else
-					re.add(i);
-			} else if (sentBatches[i][0] == receivedMessages[j][0]) {
-				// j is not full
-				if (!isFull) {
-					while (j < receivedMessages.length && receivedMessages[j][0] == sentBatches[i][0]) {
-						users.put(receivedMessages[j][1], users.get(receivedMessages[j][1]) + 1);
-						j++;
-					}
-				}
-
-				if (j == receivedMessages.length) {
-					isFull = true;
-					j--;
-				}
-
-				for (k = 1; k < sentBatches[i].length; k++) {
-					if (users.get(sentBatches[i][k]) <= 0) {
-						isAdd = false;
-						break;
-					}
-				}
-				if (isAdd) {
-					for (k = 1; k < sentBatches[i].length; k++) {
-						users.put(sentBatches[i][k], users.get(sentBatches[i][k]) - 1);
-					}
-				} else
-					re.add(i);
-			} else {
-				// j is not full
-				if (!isFull) {
-					while (j < receivedMessages.length && receivedMessages[j][0] <= sentBatches[i][0]) {
-						users.put(receivedMessages[j][1], users.get(receivedMessages[j][1]) + 1);
-						j++;
-					}
-				}
-
-				if (j == receivedMessages.length) {
-					isFull = true;
-					j--;
-				}
-
-				for (k = 1; k < sentBatches[i].length; k++) {
-					if (users.get(sentBatches[i][k]) <= 0) {
-						isAdd = false;
-						break;
-					}
-				}
-
-				if (isAdd) {
-					for (k = 1; k < sentBatches[i].length; k++) {
-						users.put(sentBatches[i][k], users.get(sentBatches[i][k]) - 1);
-					}
-				} else
-					re.add(i);
-			}
-		}
+		
+		
+		
 
 		int[] result = new int[re.size()];
 		for (i = 0; i < re.size(); i++) {
@@ -145,7 +32,6 @@ public class Kik_RateLimit {
 	}
 
 	public static void main(String[] args) {
-
 		/**
 		 * test 1
 		 */
