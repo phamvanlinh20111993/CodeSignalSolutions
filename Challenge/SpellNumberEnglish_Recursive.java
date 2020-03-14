@@ -25,8 +25,8 @@ public class SpellNumberEnglish_Recursive {
 
 		result += hundreds > 0 ? " " + Numbers[hundreds] + " " + Numbers[Numbers.length - 1] : "";
 		result += dozens > 1 ? " " + Numbers[dozens + 18] : dozens > 0 ? " " + Numbers[dozens * 10 + units] : "";
-		result += units > 0 ? dozens > 1 ? "-" + Numbers[units] : " " + Numbers[units] : "";
-
+		result += units > 0 ? dozens > 1 ? "-" + Numbers[units] : dozens == 1 ? "" : " " + Numbers[units] : "";
+		//System.out.println(hundreds + " " + dozens + " " + units + "  " + result );
 		return result;
 	}
 
@@ -151,6 +151,10 @@ public class SpellNumberEnglish_Recursive {
 
 		System.out.println("############### test 14, n = 9223372036854775807L ###############");
 		System.out.println(CardinalNumbers(9223372036854775807L));
+		
+		
+		System.out.println("############### test 15, n = 19000016 ###############");
+		System.out.println(CardinalNumbers(19000016L));
 
 	}
 
