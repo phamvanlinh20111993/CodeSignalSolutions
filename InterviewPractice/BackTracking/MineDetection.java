@@ -1,4 +1,4 @@
-package BackTracking;
+package InterviewPractice.BackTracking;
 
 public class MineDetection {
 

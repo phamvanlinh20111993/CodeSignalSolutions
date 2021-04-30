@@ -1,4 +1,4 @@
-package CodeJavaEx;
+package InterviewPractice.CodeJavaEx;
 
 import java.util.ArrayList;
 import java.util.Arrays;

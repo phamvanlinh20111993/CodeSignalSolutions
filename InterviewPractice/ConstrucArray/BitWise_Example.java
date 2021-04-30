@@ -1,4 +1,4 @@
-package ConstrucArray;
+package InterviewPractice.ConstrucArray;
 
 public class BitWise_Example {
 

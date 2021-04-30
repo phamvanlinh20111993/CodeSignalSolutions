@@ -1,4 +1,4 @@
-package BackTracking;
+package InterviewPractice.BackTracking;
 import java.util.TreeMap;
 
 public class WordBoggle {

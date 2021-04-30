@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ConstrucArray;
+package InterviewPractice.ConstrucArray;
 
 /**
  * @author PhamVanLinh

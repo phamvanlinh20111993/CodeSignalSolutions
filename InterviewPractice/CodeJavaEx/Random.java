@@ -1,4 +1,4 @@
-package CodeJavaEx;
+package InterviewPractice.CodeJavaEx;
 
 import java.util.HashSet;
 import java.util.Iterator;

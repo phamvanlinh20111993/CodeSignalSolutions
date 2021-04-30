@@ -1,4 +1,4 @@
-package LearnHowToUseGit;
+package Challenge;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package ConstrucArray;
+package InterviewPractice.ConstrucArray;
 
 import java.util.ArrayList;
 import java.util.List;

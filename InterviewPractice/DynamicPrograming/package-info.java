@@ -5,4 +5,4 @@
  * @author PhamVanLinh
  *
  */
-package DynamicPrograming;
+package InterviewPractice.DynamicPrograming;

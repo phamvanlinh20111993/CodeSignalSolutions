@@ -1,4 +1,4 @@
-package CodeJavaEx;
+package InterviewPractice.CodeJavaEx;
 
 public class SamSung_SMVC_Shipper {
 	/**

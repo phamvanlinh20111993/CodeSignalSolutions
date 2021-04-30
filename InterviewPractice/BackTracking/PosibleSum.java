@@ -1,4 +1,4 @@
-package BackTracking;
+package InterviewPractice.BackTracking;
 import java.util.TreeSet;
 
 public class PosibleSum {
