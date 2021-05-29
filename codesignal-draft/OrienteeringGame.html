@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>My Heading</h2>
+
+<p>Play around with the code and click on the "Run" button to view the result.</p>
+
+<p id="demo"></p>
+
+<script>
+//let matrix = [
+//  [1, 10, 10, 10, 10, 10],
+//  [1, 10, 1,  1,  1,  10],
+//  [1, 10, 1,  10, 1,  10],
+//  [1, 1,  1,  10, 1,  11],
+//  [10,10, 10, 10, 1,  1],
+//]
+
+let matrix = [
+  [1, 1,  100,10,  5,  1,   1],
+  [1, 10, 100,1,   1,  101, 1],
+  [1, 10, 10, 10,  4,  10 , 1],
+  [1, 1,  1,  10,  1,  11,  1],
+  [10,10, 1,  10,  1,  1,  20],
+  [1 ,1,  1,  10,  1,  11, 20],
+  [1 ,10, 10, 10,  100,1,  20],
+  [1, 1,  1,  1,   1,  1,  1]]
+
+let res = new Array(matrix.length).fill(-1)
+res = res.map(v => new Array(matrix[0].length).fill(0))
+res[0][0] = matrix[0][0]
+
+let res1 = new Array(matrix.length).fill(-1)
+res1 = res1.map(v => new Array(matrix[0].length).fill(0))
+res1[0][0] = matrix[0][0]
+
+
+for(let j = 0; j < matrix[0].length; j++){
+  for(let i = 0; i < matrix.length; i++){
+    if(i-1 >= 0 && j-1 >= 0){
+      res[i][j] = matrix[i][j] + Math.min(res[i-1][j], res[i][j-1]) 
+    }else if(i-1 >= 0){
+        res[i][j] = matrix[i][j] + res[i-1][j]
+    }else if(j-1 >= 0){
+      res[i][j] = matrix[i][j] + res[i][j-1]
+    }else{
+      res[i][j] = matrix[i][j] 
+    }
+  }
+  
+  /*if(j > 1){
+    for(let i = matrix.length-1; i >= 0; i--){
+      if(i+1 < matrix.length && j-1 >= 0){
+        res1[i][j] = Math.min(matrix[i][j] + Math.min(res1[i+1][j], res1[i][j-1]), res[i][j])
+        
+      }else if(i+1 < matrix.length){
+          res1[i][j] = Math.min(matrix[i][j] + res1[i+1][j], res[i][j])
+      }else if(j-1 >= 0){
+        res1[i][j] = Math.min(matrix[i][j] + res1[i][j-1], res[i][j])
+      }else{
+          res1[i][j] = Math.min(matrix[i][j], res[i][j]) 
+      }
+      res[i][j] = res1[i][j]
+    }
+   }else{
+            for(let i = matrix.length-1; i >= 0; i--)  res1[i][j] = res[i][j]
+   } */
+}
+
+for(let j = 0; j < matrix[0].length; j++){
+	for(let i = 0; i <  matrix.length; i++){
+      if(i+1 < matrix.length && j+1 < matrix[0].length){
+        res[i][j] = Math.min(matrix[i][j] + Math.min(res1[i+1][j], res[i][j+1]), res[i][j])
+      }else if(i+1 < matrix.length){
+          res[i][j] = Math.min(matrix[i][j] + res[i+1][j], res[i][j])
+      }else if(j+1 < matrix[0].length){
+        res[i][j] = Math.min(matrix[i][j] + res[i][j+1], res[i][j])
+      }else{
+         res[i][j] = Math.min(matrix[i][j], res[i][j]) 
+      }
+    }
+}
+
+console.log(res)
+// console.log(res1)
+</script>
+
+</body>
+</html>

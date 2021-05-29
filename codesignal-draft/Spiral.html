@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<script>
+	
+	let rectangularSpiral = (firstPoint, secondPoint) => {
+		//(y, x) <=> (i, j), clockwise direction
+		const DIRECTION = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+		const CYCLE = 4;
+		
+		let [x, y] = firstPoint
+		let [x1, y1] = secondPoint
+		let isVisited = new Map();
+		
+		if(x == x1 && y == y1) return [firstPoint, secondPoint]
+		
+		const getStartDirection = () =>{
+			// firstPoint and secondPoint direction vector
+			let nfs = [x1 - x, y1 - y]
+			// x direction vector
+			let nx = [1, 0]
+			// y direction vector
+			let ny = [0, -1]
+			
+			let distance = Math.sqrt(nfs[0] * nfs[0] + nfs[1] * nfs[1])
+			console.log("distance", nfs)
+			let cosNfsNx = distance == 0 ? 0 : nfs[0] / distance
+			let cosNfsNy = distance == 0 ? 0 : nfs[1] / distance
+			let angleNfsNx = Math.acos(cosNfsNx) * (180 / Math.PI)
+			let angleNfsNy = Math.acos(cosNfsNy) * (180 / Math.PI)
+			let startDirect = 0;
+            
+			if(angleNfsNx >= 90 && angleNfsNy < 90) startDirect = 1;	
+			if(angleNfsNx > 90 && angleNfsNy >= 90) startDirect = 2;			
+			if(angleNfsNx <= 90 && angleNfsNy > 90) startDirect = 3;
+			
+			console.log('to', angleNfsNx, angleNfsNy, startDirect)
+			
+			return startDirect == 0 ? 3 : startDirect - 1;
+		}
+		
+		const startSpiralBound = () => {
+            return [[firstPoint[0], firstPoint[1]], [secondPoint[0], secondPoint[1]], 
+            [secondPoint[0], firstPoint[1]], [firstPoint[0], secondPoint[1]]]
+		}
+		
+		let minX = 1000, minY = 1000, maxX = -1, maxY = -1
+		startSpiralBound().map(v => {
+			minX = minX > v[0] ? v[0] : minX
+			maxX = maxX < v[0] ? v[0] : maxX
+			minY = minY > v[1] ? v[1] : minY
+			maxY = maxY < v[1] ? v[1] : maxY
+		})
+		const isInRange = (x, y) =>{
+			console.log('isInRange', x, y, "----", minX, minY, maxX, maxY)
+			return x >= minX && x <= maxX &&  y >= minY && y <= maxY
+		}
+
+		const getNextDirection = ([x, y], currentDirect) =>{
+			let isChange = false
+			startSpiralBound().map(v => isChange = (v[0] == x && v[1] == y) ? true : isChange)
+			let store  = [x, y]
+			
+			let nextX = -1, nextY = -1;
+			if(!isChange){
+				nextX = x + DIRECTION[currentDirect][0]
+				nextY = y + DIRECTION[currentDirect][1]
+				// next cycle of spiral
+				if(isVisited.has(`${nextX}-${nextY}`)){
+					isChange = true
+				}
+			}
+			console.log('getNextDirection', x, y, startSpiralBound(), "next", nextX, nextY,  isChange, Array.from(isVisited.keys()).join(","))
+			
+			return {isChange, 
+				next: isChange ? (currentDirect + 1) % CYCLE : currentDirect,
+				store
+			}
+		}
+		
+        console.log('start', startSpiralBound().map(v => v.join('-')).join(","))
+		const isEndSpiral = ([x, y], currentDirect)=> {
+			let x1 = x + DIRECTION[currentDirect][0]
+			let y1 = y + DIRECTION[currentDirect][1]
+			console.log("next end", x1, y1)
+			if(isVisited.has(`${x1}-${y1}`) || !isInRange(x1, y1)){
+				console.log("has")
+				let nextDirect = (currentDirect + 1) % CYCLE
+				let nextX = x + DIRECTION[nextDirect][0]
+				let nextY = y + DIRECTION[nextDirect][1]
+				if(isVisited.has(`${nextX}-${nextY}`)){
+					console.log("x", x, y, Array.from(isVisited.keys()).join(","))
+					return true
+				}
+			}
+			// is out of start box
+			return false
+		}
+		
+		let isEnd = false;
+		let res = []
+        isVisited.set(`${x}-${y}`, 1)
+		let currentDirect = getStartDirection(); 
+		
+		let count = 0;
+		while(!isEnd){
+			let currentD = getNextDirection([x, y], currentDirect)
+			
+			if(!isInRange(x, y)) break;
+			
+            isVisited.set(`${x}-${y}`, 1)	
+			if(currentD.isChange){
+				res.push(currentD.store)
+				currentDirect = currentD.next
+			}
+			x += DIRECTION[currentDirect][0]
+			y += DIRECTION[currentDirect][1]
+			console.log("(x, y)= is end coords, ", x, y, currentD)
+			isEnd = isEndSpiral([x, y], currentDirect)
+			if(isEnd){
+				res.push([x, y])
+			}
+			console.log("isEnd", isEnd, count)
+			count++
+			// if(count > 20) break;
+		}
+		console.log('res', res)
+		
+		return res;
+	}
+	
+	// let firstPoint = [0, 0],
+	//	secondPoint = [4, 3];
+
+	// [[7,3], [1,3], [1,2], [7,2]]
+//	let firstPoint = [9, 1],
+  //      secondPoint= [0, 0]
+  
+  	// [[8,0], [0,0]]
+	// let firstPoint = [8, 0],
+       // secondPoint= [0, 0]
+	   
+	  let firstPoint = [0,99], 
+		  secondPoint = [0,0]
+		
+	// let firstPoint = [1, 3],
+   //     secondPoint = [3, 1]
+		
+	// let firstPoint = [5, 4],
+	// 	secondPoint = [5, 4]
+	//let firstPoint = [2, 0],
+	//    secondPoint = [0, 5]
+	rectangularSpiral(firstPoint, secondPoint)
+</script>
+
+</body>
+</html>

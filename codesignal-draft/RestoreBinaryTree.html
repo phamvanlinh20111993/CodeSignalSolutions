@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<script>
+	//
+	// Binary trees are already defined with this interface:
+	function Tree(x) {
+	  this.value = x;
+	  this.left = null;
+	  this.right = null;
+	}
+	
+	let buildTree = treeStructure =>{
+		// console.log("tree", treeStructure);
+		let tree = new Tree(treeStructure[0].val)
+		return tree;
+	}
+	
+	/** Try with O(n) time**/
+	restoreBinaryTree1 = (inorder, preorder) => {
+		
+		let storeInorderIndex = new Map()
+		inorder.map((v, i) => storeInorderIndex.set(v, 
+			{ind: i, 
+			 isExistLeftChild: false, 
+			 isExistRightChild: false,
+			 isRightChild: false,
+			 isLeftChild: false,
+			 level: 0, 
+			 isConnectLeftChild: false,
+			 isConnectRightChild: false,
+			 val: v,
+			 isVisited: false, 
+			 parent: null}))
+			 
+		let stackCheckParent = new Array();
+			 
+		for(let ind = 0; ind < preorder.length; ind++){
+			let objectData = {...storeInorderIndex.get(preorder[ind])}
+			let parentOnStack = stackCheckParent.length >= 1 ? {...stackCheckParent[stackCheckParent.length - 1]}
+																: {...storeInorderIndex.get(preorder[ind])}
+			// console.log("map", storeInorderIndex);
+			if(objectData.ind - 1 >= 0){
+				const nextObjectData = storeInorderIndex.get(inorder[objectData.ind - 1])
+				if(!nextObjectData.isVisited)
+					objectData.isExistLeftChild = true;
+			}
+			
+			if(objectData.ind + 1 < inorder.length){
+			    const nextObjectData1 = storeInorderIndex.get(inorder[objectData.ind + 1])
+				console.log("map1", storeInorderIndex, inorder[objectData.ind + 1]);
+				console.log("wtf1", nextObjectData1);
+				if(!nextObjectData1.isVisited)
+					objectData.isExistRightChild = true;
+			}
+			
+			if(parentOnStack.isExistLeftChild && !parentOnStack.isConnectLeftChild){
+				parentOnStack.isConnectLeftChild = true
+				objectData.isLeftChild = true
+				objectData.parent = parentOnStack.val
+				objectData.level = parentOnStack.level + 1
+			}else 
+			if(parentOnStack.isExistRightChild && !parentOnStack.isConnectRightChild){
+				parentOnStack.isConnectRightChild = true
+				objectData.isRightChild = true
+				objectData.parent = parentOnStack.val
+				objectData.level = parentOnStack.level + 1
+			}
+			
+			let count = 0
+			if(parentOnStack.isExistLeftChild){
+				if(parentOnStack.isConnectLeftChild) count++
+			}else{
+				count++
+			}
+			
+			if(parentOnStack.isExistRightChild){
+				if(parentOnStack.isConnectRightChild) count++
+			}else{
+				count++
+			}
+			
+			console.log("parent on stack", parentOnStack)
+			if(count == 2 && stackCheckParent.length > 0){
+				stackCheckParent.pop()
+			}else{
+				stackCheckParent.length > 0 && (stackCheckParent[stackCheckParent.length - 1] = {...parentOnStack})
+			}
+			
+			objectData.isVisited = true
+			parentOnStack.isVisited = true;
+			storeInorderIndex.set(preorder[ind], objectData)
+			storeInorderIndex.set(parentOnStack.val, parentOnStack)
+													
+			if(objectData.isExistLeftChild || objectData.isExistRightChild){
+				stackCheckParent.push({...objectData})
+			}
+		}
+		
+		
+		let treeStructure = []
+		for(let k of storeInorderIndex.keys()){
+			let v = storeInorderIndex.get(k)
+			treeStructure.push({val: k, isLeftChild: v.isLeftChild, isRightChild: v.isRightChild, level: v.level, parent: v.parent})
+			console.log("val", k, v)
+		}
+		
+		treeStructure = treeStructure.sort((a, b) => a.level - b.level)
+		return buildTree(treeStructure);
+	}
+	
+	
+	//let preorder = [1, 2, 4, 12, 13, 17, 18, 14, 15, 16, 5, 10, 11, 3, 6, 9, 7, 8]
+//	let inorder = [17, 13, 18, 12, 14, 16, 15, 4, 2, 10, 5, 11, 1, 6, 9, 3, 8, 7]
+	//restoreBinaryTree1(inorder, preorder)
+	
+	//let inorder = [4, 2, 1, 5, 3, 6]
+	//let preorder = [1, 2, 4, 3, 5, 6]
+	//restoreBinaryTree1(inorder, preorder)
+	
+//	let preorder1 = [1, 2, 4, 7, 8, 3, 5, 6]
+	//let inorder1 = [2, 7, 4, 8, 1, 6, 5, 3]
+//	restoreBinaryTree1(inorder1, preorder1)
+
+
+	let inorder1 = [-100000, -99999, -99998]
+	let preorder1 = [-99999, -100000, -99998]
+	restoreBinaryTree1(inorder1, preorder1)
+</script>
