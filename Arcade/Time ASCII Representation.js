@@ -290,6 +290,7 @@ const calClockHands = (h, m) => {
 }
 
 const fillToTimeASCII = coords => {
+	// Using another way: points that are not outside the circle's radius 
     const coordsOutFrame1 = [[0, 0], [1, 0], [2, 0], [3, 0], [0, 1], [1, 1], [2, 1], [0, 2], [1, 2], [0, 2]]
     const coordsOutFrame2 = coordsOutFrame1.map(v => [16 - v[0], v[1]])
     const coordsOutFrame3 = coordsOutFrame1.map(v => [16 - v[0], 16 - v[1]])

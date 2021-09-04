@@ -1,0 +1,206 @@
+This test case will be hidden from candidates.
+Input:
+pieces:
+[[["#","#","#"],[".","#","."]], 
+ [[".","#","."],["#","#","#"]], 
+ [[".","#","#"],["#","#","."]], 
+ [["#",".","."],["#","#","#"]], 
+ [["#","#"],["#","#"]], 
+ [[".",".","#"],["#","#","#"]], 
+ [["#","#","#","#"]], 
+ [["#","#","#"],[".","#","."]], 
+ [["#","#","."],[".","#","#"]], 
+ [[".","#","."],["#","#","#"]], 
+ [["#","#","#"],[".",".","#"]], 
+ [["#","#"],["#","#"]], 
+ [["#","#","#","#"]], 
+ [[".",".","#"],["#","#","#"]], 
+ [["#","#","."],[".","#","#"]], 
+ [["#","#","#"],[".",".","#"]]]
+Output:
+2
+Expected Output:
+3
+Console Output:
+
+----------------------------------0----------------------------
+###
+.#.
+coord before []
+eatPointPosition [] 0
+[]
+----------------board after cal point-------------------
+aaa.......
+.a........
+----------------------------------1----------------------------
+.#.
+###
+coord before []
+eatPointPosition [] 0
+[]
+----------------board after cal point-------------------
+aaab......
+.abbb.....
+----------------------------------2----------------------------
+.##
+##.
+coord before []
+eatPointPosition [] 0
+[]
+----------------board after cal point-------------------
+aaab..cc..
+.abbbcc...
+----------------------------------3----------------------------
+#..
+###
+coord before []
+eatPointPosition [] 0
+[]
+----------------board after cal point-------------------
+........dd
+aaab..ccd.
+.abbbcc.d.
+----------------------------------4----------------------------
+##
+##
+coord before []
+eatPointPosition [] 0
+[]
+----------------board after cal point-------------------
+....ee..dd
+aaabeeccd.
+.abbbcc.d.
+----------------------------------5----------------------------
+..#
+###
+coord before []
+eatPointPosition [] 0
+[]
+----------------board after cal point-------------------
+..f.......
+fff.ee..dd
+aaabeeccd.
+.abbbcc.d.
+----------------------------------6----------------------------
+####
+coord before []
+eatPointPosition [] 0
+[]
+----------------board after cal point-------------------
+...g......
+...g......
+..fg......
+fffgee..dd
+aaabeeccd.
+.abbbcc.d.
+----------------------------------7----------------------------
+###
+.#.
+coord before []
+eatPointPosition [] 0
+[]
+----------------board after cal point-------------------
+...g......
+...g..h...
+..fg.hh...
+fffgeeh.dd
+aaabeeccd.
+.abbbcc.d.
+----------------------------------8----------------------------
+##.
+.##
+coord before [ 17 ]
+eatPointPosition [ [ 17, 1 ] ] 1
+[ [ 17, 1 ] ]
+----------------board after cal point-------------------
+...g......
+...g..h.i.
+..fg.hhii.
+aaabeeccd.
+.abbbcc.d.
+----------------------------------9----------------------------
+.#.
+###
+coord before []
+eatPointPosition [] 0
+[]
+----------------board after cal point-------------------
+j..g......
+jj.g..h.i.
+j.fg.hhii.
+aaabeeccd.
+.abbbcc.d.
+----------------------------------10----------------------------
+###
+..#
+coord before []
+eatPointPosition [] 0
+[]
+----------------board after cal point-------------------
+j..gkk....
+jj.gk.h.i.
+j.fgkhhii.
+aaabeeccd.
+.abbbcc.d.
+----------------------------------11----------------------------
+##
+##
+coord before []
+eatPointPosition [] 0
+[]
+----------------board after cal point-------------------
+.ll.......
+jllgkk....
+jj.gk.h.i.
+j.fgkhhii.
+aaabeeccd.
+.abbbcc.d.
+----------------------------------12----------------------------
+####
+coord before [ 18 ]
+eatPointPosition [ [ 18, 1 ] ] 1
+[ [ 18, 1 ] ]
+----------------board after cal point-------------------
+.ll.......
+jllgkk....
+jj.gk.h.im
+j.fgkhhiim
+.abbbcc.dm
+----------------------------------13----------------------------
+..#
+###
+coord before []
+eatPointPosition [] 0
+[]
+----------------board after cal point-------------------
+.ll...nn..
+jllgkk.n..
+jj.gk.hnim
+j.fgkhhiim
+.abbbcc.dm
+----------------------------------14----------------------------
+##.
+.##
+coord before []
+eatPointPosition [] 0
+[]
+----------------board after cal point-------------------
+.........o
+.ll...nnoo
+jllgkk.no.
+jj.gk.hnim
+j.fgkhhiim
+.abbbcc.dm
+----------------------------------15----------------------------
+###
+..#
+coord before []
+eatPointPosition [] 0
+[]
+----------------board after cal point-------------------
+.ppp.....o
+.llp..nnoo
+jllgkk.no.
+jj.gk.hnim
+j.fgkhhiim
+.abbbcc.dm
