@@ -351,6 +351,9 @@ callBestPlaceForPieceOnBoard = (board, pieceRotate, num) => {
     return board;
 }
 
+/**
+ * using to pass codesignal solution, fuck bitch title
+ */
 tetrisGame = pieces => {
     const ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789'.split('')
     let board = new Array(BOARD_HEIGHT).fill([])

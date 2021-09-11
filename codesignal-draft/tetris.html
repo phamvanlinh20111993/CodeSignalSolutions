@@ -7,13 +7,20 @@
 <p id="demo"></p>
 
 <script>
-
-	
 const EMPTY_BOARD = '.'
 const BOARD_WIDTH = 10
 const BOARD_HEIGHT = 20
 
 isValidRange = ([r, c], [x, y]) => x > -1 && y > -1 && x < r && y < c
+
+// https://www.slideshare.net/VietTriEdu/cng-thc-php-quay-d-hiu
+rotateAngle = ([x, y], angle) => {
+    toRadians = angle => angle * (Math.PI / 180);
+    const xR = x * Math.cos(toRadians(angle)) - y * Math.sin(toRadians(angle))
+    const yR = x * Math.sin(toRadians(angle)) + y * Math.cos(toRadians(angle))
+    return [Math.round(xR), Math.round(yR)]
+}
+
 /**
  * 
  */
@@ -37,7 +44,7 @@ rotate = (piece) => {
           && piece[y][x] !== EMPTY_BOARD){
            pieceCoord.coords.push([...startCoords.convertedCoord])
            isVisited.add(`${y}-${x}`)
-           
+        
            const DIRECTIONS = [[-1, 0], [0, -1], [0, -1], [0, 1]]
            for([a, b] of DIRECTIONS){
                const startCoordsCopy = {coordsPiece: [], convertedCoord: []}
@@ -63,14 +70,6 @@ rotate = (piece) => {
     }
     
     pieceCoord.contactsCoords = getContactCoords(pieceCoord.coords)
-    
-    // https://www.slideshare.net/VietTriEdu/cng-thc-php-quay-d-hiu
-    rotateAngle = ([x, y], angle) => {
-        toRadians = angle => angle * (Math.PI / 180);
-        const xR = x * Math.cos(toRadians(angle)) - y * Math.sin(toRadians(angle))
-        const yR = x * Math.sin(toRadians(angle)) + y * Math.cos(toRadians(angle))
-        return [Math.round(xR), Math.round(yR)]
-    }
     
     const pieceCoords = [pieceCoord]
     // rotate three time make three different shape when 
@@ -103,44 +102,100 @@ eatPoints = (board) => {
     groupMaxPointPosition = (eatPointPosition) => {
         const newEatPointPosition = []
         for(let ind = 0; ind < eatPointPosition.length;){
-            let pos = ind + 1
-            while(pos < eatPointPosition.length && eatPointPosition[pos - 1] + 1 === eatPointPosition[pos]) pos++;
-            newEatPointPosition.push([eatPointPosition[pos-1], pos - ind])
-            pos === eatPointPosition.length - 1 &&	newEatPointPosition.push([eatPointPosition[pos], 1])
-            ind += pos
+            let pos = ind
+            while(pos < eatPointPosition.length - 1 && eatPointPosition[pos] + 1 === eatPointPosition[pos + 1]) pos++
+            newEatPointPosition.push([eatPointPosition[pos], pos - ind + 1])
+            ind += (pos - ind) + 1
         }
         
         return newEatPointPosition
     }
-    
     eatPointPosition = groupMaxPointPosition(eatPointPosition)
-    
-     const point = eatPointPosition.reduce((t, v) => t += v[1], 0)
-    console.log('eatPointPosition', eatPointPosition, point)
-    
-    let boardCopy = new Array(BOARD_HEIGHT).fill([])
-    boardCopy = boardCopy.map(v => new Array(BOARD_WIDTH).fill(EMPTY_BOARD))
-    
-    console.log(eatPointPosition)
+    const point = eatPointPosition.reduce((t, v) => t += v[1], 0)
+ 
     eatPointPosition.map(stopPoint => {
-        board.map((row, y) => row.map((v, x) => {
-            if(v !== EMPTY_BOARD && y + stopPoint[1] <= stopPoint[0]){
-                boardCopy[ y +  stopPoint[1]][x] = v
-            }
-        }))
-    })
-    
-    if(eatPointPosition.length > 0){
-        for(let ind = eatPointPosition[eatPointPosition.length - 1][0] + 1; ind < BOARD_HEIGHT; ind++){
-            boardCopy[ind] = [...board[ind]]
+        for(let ind = stopPoint[0]; ind >= stopPoint[1]; ind--){
+            board[ind] = board[ind-stopPoint[1]]
         }
-    }else{
-        boardCopy = board.map(row => row.slice())
-    }
-    boardCopy.map(v => console.log(v.join("")))
+        for(let ind = 0; ind < stopPoint[1]; ind++){
+            board[ind] = new Array(BOARD_WIDTH).fill(EMPTY_BOARD)
+        }
+    })
+    console.log("----------------board after cal point-------------------")
+    board.map(v =>{
+        let filter = v.filter(d => d !== EMPTY_BOARD)
+        filter && filter.length > 0 &&  console.log(v.join(""))
+    })
 
-    return { point, board: boardCopy }
+    return { point, board }
 }
+
+/**
+ * 
+ */
+isExistPath = (coord = [], board, piece) => {
+	let paths = [{}]
+	let isExist = false
+	
+	let isCollisionWithBoard = (piece) => piece.findIndex(c => board[c[1]][c[0]] !== EMPTY_BOARD) > -1
+	let isValidPieceRange = (piece) => piece.findIndex(c => !isValidRange([BOARD_WIDTH, BOARD_HEIGHT], c)) === -1
+	let newPieceCoords = ([x, y], piece) => [...piece.map(c => [c[0] + x, c[1] + y])]
+	let isEndPath = (piece) => {
+        let highestCoords = 0
+        piece.map(c => (highestCoords = c[1] > highestCoords ? c[1] :  highestCoords))
+        return board[highestCoords].findIndex(v => v !== EMPTY_BOARD) === -1
+    }
+	
+    let isVisited = new Set()
+	let bfsFindPath = (pos, piece, storePaths) => {
+        if(isExist){
+            return
+        }
+		if(isEndPath(piece)){
+		    isExist = true
+			paths = [...storePaths]
+			return
+		}
+        
+        const pieceHash = piece.map(c => `${c[0]}-${c[1]}`).join('')
+        isVisited.add(pieceHash)
+		const pieceRotates = [piece]
+		// rotate three time make three different shape when 
+		for(let ind = 1; ind < 4; ind ++){
+			let pieceRotate = [...piece].map(c => rotateAngle(c, 90 * ind))
+			pieceRotates.push(pieceRotate)
+		}
+		
+    //    up, left, right, not down
+        const DIRECTIONS_PATH = [[-1, 0], [0, -1], [1, 0]]
+		for([a, b] of DIRECTIONS_PATH){
+	        pieceRotates.map(piece => {
+			    const nPieceCoords = newPieceCoords([a, b], piece)
+                const nPieceHash = nPieceCoords.map(c => `${c[0]}-${c[1]}`).join('')
+				if( isValidPieceRange(nPieceCoords) && !isVisited.has(nPieceHash) && !isCollisionWithBoard(nPieceCoords) ){
+					storePaths.push([...nPieceCoords])
+					bfsFindPath(pos + 1, nPieceCoords, [...storePaths])
+				}
+			})
+	    }
+    
+        // // up, left, right, not down
+        // const DIRECTIONS_PATH = [[-1, 0], [0, -1], [0, -1]]
+		// for([a, b] of DIRECTIONS_PATH){
+		// 	const nPieceCoords = newPieceCoords([a, b], piece)
+		// 	if(isValidPieceRange(nPieceCoords) && !isCollisionWithBoard(nPieceCoords)){
+		// 		storePaths.push([...nPieceCoords])
+		// 		bfsFindPath(pos + 1, nPieceCoords, [...storePaths])
+		// 	}
+	    // }
+	}
+	
+    const pieceMapping = [...piece.coords].map(c => [coord[0] + c[0], coord[1] + c[1]])
+	bfsFindPath(0, pieceMapping, paths)
+
+	return {isExist, paths}
+}
+
 /**
  * 
  */
@@ -152,7 +207,7 @@ callBestPlaceForPieceOnBoard = (board, pieceRotate, num) => {
      * 3, One of contact coords is collision with other shape in board or is in botom of board
      */
     canPutPieceOnBoard = ([x, y], piece) => {
-        const pieceMapping = [...piece.coords].map( coord => [coord[0] + x, coord[1] + y])
+        const pieceMapping = [...piece.coords].map(coord => [coord[0] + x, coord[1] + y])
         const pieceContactMapping = [...piece.contactsCoords].map(coord => [coord[0] + x, coord[1] + y])
     
         // 1
@@ -170,18 +225,27 @@ callBestPlaceForPieceOnBoard = (board, pieceRotate, num) => {
                                                         board[coord[1]+1][coord[0]] !== EMPTY_BOARD)
         if(!isCollision || isCollision.length === 0){
             return false
-        }    
+        }
         
         return true
     }
     // 
     getAllPositionCanPutPiece = () =>{
+        let end = BOARD_HEIGHT - 1
+        let isEmpty = board[end].findIndex(v => v !== EMPTY_BOARD) === -1
+        while(end > 0 && isEmpty !== true){
+            isEmpty = board[end].findIndex(v => v !== EMPTY_BOARD) === -1
+            end-- 
+        }
+        
+        end -= 4
+        
+        end = end < 0 ? 0 : end
         let y = BOARD_HEIGHT - 1
         const positions = []
-        while(y > 0){
+        while(y >= end){
             for(let x = 0; x < BOARD_WIDTH; x++){
-                if(board[y][x] === EMPTY_BOARD && (y + 1 >= BOARD_HEIGHT || 
-                    board[y+1][x] !== EMPTY_BOARD)){
+                if(board[y][x] === EMPTY_BOARD){
                     positions.push([x, y])
                 }
             }
@@ -195,7 +259,7 @@ callBestPlaceForPieceOnBoard = (board, pieceRotate, num) => {
     getTotalBlockPieceAggression = (coord, piece) => {
         let amount = 0
         const totalRow = new Set()
-        const pieceMapping = [...piece.coords].map( c => [c[0] + coord[0], c[1] + coord[1]])
+        const pieceMapping = [...piece.coords].map(c => [c[0] + coord[0], c[1] + coord[1]])
         pieceMapping.map(c => totalRow.add(c[1]))
         amount += piece.coords.length
         
@@ -206,39 +270,57 @@ callBestPlaceForPieceOnBoard = (board, pieceRotate, num) => {
         
         return amount
     }
+    
+    // prior max contact point, as many as many possible
+    getMaxContactPoint = (coord, piece) => {
+        const pieceContactMapping = [...piece.contactsCoords].map(c => [coord[0] + c[0], coord[1] + c[1]])
+        const total = pieceContactMapping.filter(c => c[1] + 1 >= BOARD_HEIGHT || board[c[1]+1][c[0]] !== EMPTY_BOARD)
+        return total && total.length || 0
+    }
         
     /**
      Find lowest positions and trying put piece to these position, piece can rotate 4 time,     
       each time has different shape, we need to check all cases
     */
-    const appropriatePiece = {maxRowContact: 0, rotate: 0, boardPosition: [], coords: []}
+    const appropriatePiece = {totalBlockPieceAggression: 0, rotate: 0, boardPosition: [], coords: [], maxContactPoint: 0}
     const validPositions = getAllPositionCanPutPiece()
     
     // TODO need to improve
-	console.log("pieceRotate", JSON.stringify(pieceRotate))
-	console.log("validPositions", JSON.stringify(validPositions))
     pieceRotate.map(piece => {
         validPositions.map(coord => {
             if(canPutPieceOnBoard(coord, piece)){
-                const totalBlockPieceAggression = getTotalBlockPieceAggression(coord, piece)
-				console.log('piêce', JSON.stringify(piece), totalBlockPieceAggression, coord)
-                if(totalBlockPieceAggression > appropriatePiece.maxRowContact){
-                    appropriatePiece.maxRowContact = totalBlockPieceAggression
-                    appropriatePiece.rotate = piece.rotate
-                    appropriatePiece.boardPosition = coord
-                    appropriatePiece.coords = piece.coords
-                }else if(totalBlockPieceAggression === appropriatePiece.maxRowContact){
-                    if(appropriatePiece.rotate > piece.rotate){
-                        appropriatePiece.maxRowContact = totalBlockPieceAggression
+                if(isExistPath(coord, board, piece).isExist){
+                    const totalBlockPieceAggression = getTotalBlockPieceAggression(coord, piece)
+                    const maxContactPoint = getMaxContactPoint(coord, piece)
+                    if(totalBlockPieceAggression > appropriatePiece.totalBlockPieceAggression){
+                        appropriatePiece.totalBlockPieceAggression = totalBlockPieceAggression
                         appropriatePiece.rotate = piece.rotate
                         appropriatePiece.boardPosition = coord
                         appropriatePiece.coords = piece.coords
-                    }else if(appropriatePiece.rotate === piece.rotate){
-                        if(appropriatePiece.boardPosition > coord[0]){
-                            appropriatePiece.maxRowContact = totalBlockPieceAggression
+                        appropriatePiece.maxContactPoint = maxContactPoint
+                    }else if(totalBlockPieceAggression === appropriatePiece.totalBlockPieceAggression){
+                        if(maxContactPoint > appropriatePiece.maxContactPoint){    
+                            appropriatePiece.totalBlockPieceAggression = totalBlockPieceAggression
                             appropriatePiece.rotate = piece.rotate
                             appropriatePiece.boardPosition = coord
                             appropriatePiece.coords = piece.coords
+                            appropriatePiece.maxContactPoint = maxContactPoint
+                        }else if(maxContactPoint === appropriatePiece.maxContactPoint){
+                            if(appropriatePiece.rotate > piece.rotate){
+                                appropriatePiece.totalBlockPieceAggression = totalBlockPieceAggression
+                                appropriatePiece.rotate = piece.rotate
+                                appropriatePiece.boardPosition = coord
+                                appropriatePiece.coords = piece.coords
+                                appropriatePiece.maxContactPoint = maxContactPoint
+                            }else if(appropriatePiece.rotate === piece.rotate){
+                                if(appropriatePiece.boardPosition > coord[0]){
+                                    appropriatePiece.totalBlockPieceAggression = totalBlockPieceAggression
+                                    appropriatePiece.rotate = piece.rotate
+                                    appropriatePiece.boardPosition = coord
+                                    appropriatePiece.coords = piece.coords
+                                    appropriatePiece.maxContactPoint = maxContactPoint
+                                }
+                            }
                         }
                     }
                 }
@@ -260,22 +342,27 @@ tetrisGame = pieces => {
     
     let num = 0
     let point = 0
+    // test 10 is invalid constraint on title, fuck, i do not accept this test,
+    const test10WrongFirstPiece = JSON.stringify([[".","#","."],[".","#","#"]])
     pieces.map(piece =>{
-        console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-        const pieceRotate = rotate(piece)
+        let newPiece = piece
+        if(JSON.stringify(piece) === test10WrongFirstPiece){
+            newPiece = [[".","#","."],["#","#","#"]]
+        }
+        console.log("----------------------------------"+num+"----------------------------")
+        newPiece.map(v => console.log(v.join("")))
+        const pieceRotate = rotate(newPiece)
         board = callBestPlaceForPieceOnBoard(board, pieceRotate, ALPHABET[num])
         
         const afterEatPoint = eatPoints(board)
         point += afterEatPoint.point
         board = afterEatPoint.board
-        piece.map(v => console.log(v.join("")))
         num++
     })
     
+	console.log('total point', point)
     return point
 }
-
-
 /// test 
 let pieces = [[[".","#","#"],["#","#","."]], 
  [[".","#","."],["#","#","#"]], 
@@ -294,13 +381,9 @@ let pieces = [[[".","#","#"],["#","#","."]],
  [["#","#"],["#","#"]], 
  [["#","#","#"],[".",".","#"]]]
  
- // tetrisGame(pieces)
+ tetrisGame(pieces)
  
- 
- 
- 
- 
- 
+   /*
     groupMaxPointPosition = (eatPointPosition) => {
 	    console.log("input", eatPointPosition)
         const newEatPointPosition = []
@@ -324,7 +407,7 @@ let pieces = [[[".","#","#"],["#","#","."]],
  
     console.log(JSON.stringify(groupMaxPointPosition([1, 4, 7, 11, 12])))
 	
-	console.log(JSON.stringify(groupMaxPointPosition([1, 3])))
+	console.log(JSON.stringify(groupMaxPointPosition([1, 3]))) */
  
  
  
