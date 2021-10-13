@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>The = Operator</h2>
+
+<p id="demo"></p>
+
+<script>
+
+/*
+const fileSyncOrder = (files, storageLimit, uploadSpeed, duration) => {
+    // make sure files is order by time line
+    files = files.map((file, index) => [...file, index])
+    files = files.sort((file, file1) => file[1] - file1[1])
+	
+	console.log('input', JSON.stringify(files))
+    
+    const uploadTime = size => size / uploadSpeed
+    const getTimelineFileUploads = files => {
+        const distTime = new Set()
+        files.map(file => distTime.add(file[1]))
+        return [...distTime].map(time => time)
+    }
+    const timelineFileUploads = getTimelineFileUploads(files)
+    const uploadTimes = files.map(file => uploadTime(file[0]))
+    //Dropbox uploads files one-by-one and prioritizes them based on size, 
+    //starting with the smallest.
+    const getMinArr = arr => {
+        let min = [arr[0], 0]
+        for (let ind = 1; ind < arr.length; ind++) {
+            min[0][0] > arr[ind][0] && (min = [arr[ind], ind])
+        }
+        return min
+    }
+    //
+    let res = []
+    let durationTime = files[0][1]
+    let limitFileSize = 0
+    let queues = []
+    let index = 0
+    for (; durationTime <= duration;) {
+        
+        let pos = index + 1
+        if (index < files.length) {
+            durationTime >= files[index][1] && queues.push(files[index])
+            while (pos < files.length && files[index][1] === files[pos][1]) {
+                queues.push(files[pos])
+                pos++
+            }
+        }
+		
+		console.log('index', index, 'queues', JSON.stringify(queues))
+        
+        if (index > 0 && queues.length === 0) {
+            break;
+        }
+
+        const minArray = getMinArr(queues)
+        const minFile = minArray[0]
+        // remove on queue
+        queues.splice(minArray[1], 1);
+        const upTime = uploadTimes[minFile[2]]
+        if (limitFileSize +  minFile[0] <= storageLimit 
+            && durationTime + upTime <= duration) {
+            limitFileSize += minFile[0]
+            res.push(minFile[2])
+        }
+		
+        let posNext = pos, durationTimeTmp = durationTime;
+        while (posNext < files.length 
+            && timelineFileUploads[posNext] < durationTime + upTime) {
+            queues.push(files[posNext])
+            durationTimeTmp += files[posNext][1]
+            posNext++
+        }
+		
+        durationTime = durationTimeTmp
+        durationTime += posNext < files.length ? files[posNext][1] : 0
+        index = posNext
+    }
+
+    return res
+} */
+
+
+const fileSyncOrder = (files, storageLimit, uploadSpeed, duration) => {
+    // make sure files is order by time line
+    files = files.map((file, index) => [...file, index])
+    files = files.sort((file, file1) => file[1] - file1[1])
+
+    console.log('input: ', JSON.stringify({
+        files,
+        storageLimit,
+        uploadSpeed,
+        duration
+    }))
+
+    const uploadTime = size => size / uploadSpeed
+    const getTimelineFileUploads = files => {
+        const distTime = new Set()
+        files.map(file => distTime.add(file[1]))
+        return [...distTime].map(time => time)
+    }
+    const timelineFileUploads = getTimelineFileUploads(files)
+    const uploadTimes = files.map(file => uploadTime(file[0]))
+    //Dropbox uploads files one-by-one and prioritizes them based on size,
+    //starting with the smallest.
+    const getMinArr = arr => {
+        let min = [arr[0], 0]
+        for (let ind = 1; ind < arr.length; ind++) {
+            min[0][0] > arr[ind][0] && (min = [arr[ind], ind])
+        }
+        return min
+    }
+    //
+    let res = []
+    let durationTime = files[0][1]
+    let limitFileSize = 0
+    let queues = []
+    let index = 0
+    for (; durationTime <= duration;) {
+
+        let pos = index + 1
+        if (index < files.length) {
+            durationTime >= files[index][1] && queues.push(files[index])
+            while (pos < files.length && files[index][1] === files[pos][1]) {
+                queues.push(files[pos])
+                pos++
+            }
+        }
+
+        console.log('index', index, 'queues', JSON.stringify(queues), 'durationTime', durationTime)
+
+        if (index > 0 && queues.length === 0) {
+            break;
+        }
+        const minArray = getMinArr(queues)
+        const minFile = minArray[0]
+        // remove on queue
+        queues.splice(minArray[1], 1);
+        const upTime = uploadTimes[minFile[2]]
+        if (limitFileSize + minFile[0] <= storageLimit &&
+            durationTime + upTime <= duration) {
+            limitFileSize += minFile[0]
+            res.push(minFile[2])
+        }
+
+        let posNext = pos;
+        while (posNext < files.length &&
+            files[posNext][1] < durationTime + upTime) {
+            queues.push(files[posNext])
+            posNext++
+        }
+        console.log('durationTime + upTime', durationTime + upTime)
+        durationTime = posNext < files.length ? files[posNext][1] : durationTime + upTime
+        console.log('durationTime1', durationTime)
+        index = posNext
+    }
+    return res
+}
+
+
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Test @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Test @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+let files = [
+        [10, 5],
+        [10, 7],
+        [8, 10],
+        [2, 20]
+    ],
+    storageLimit = 20,
+    uploadSpeed = 2,
+    duration = 100;
+console.log(fileSyncOrder(files, storageLimit, uploadSpeed, duration));
+console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Test 1 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+let files1 = [
+        [20, 5],
+        [10, 5],
+        [3, 7]
+    ],
+    storageLimit1 = 100,
+    uploadSpeed1 = 1,
+    duration1 = 40
+console.log(fileSyncOrder(files1, storageLimit1, uploadSpeed1, duration1));
+
+console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Test 2 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+let files2 = [
+        [20, 5],
+        [10, 5],
+        [30, 7]
+    ],
+    storageLimit2 = 100,
+    uploadSpeed2 = 1,
+    duration2 = 40
+console.log(fileSyncOrder(files2, storageLimit2, uploadSpeed2, duration2));
+
+console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Test 3 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+let files3 = [
+        [20, 5],
+        [10, 5],
+        [3, 7]
+    ],
+    storageLimit3 = 100,
+    uploadSpeed3 = 1,
+    duration3 = 4
+console.log(fileSyncOrder(files3, storageLimit3, uploadSpeed3, duration3));
+
+
+console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Test 4 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+let files4 = [[10,2],
+[8,2],
+[6,2],
+[10,5],
+[10,7],
+[3,14]],
+storageLimit4 = 35,
+uploadSpeed4 = 2,
+duration4 = 22
+
+console.log(fileSyncOrder(files4, storageLimit4, uploadSpeed4, duration4));
+ 
+</script>
+
+</body>
+</html>
