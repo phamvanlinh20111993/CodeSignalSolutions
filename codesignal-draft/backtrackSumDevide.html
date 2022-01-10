@@ -1,0 +1,83 @@
+
+
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>My Heading</h2>
+
+<p>Play around with the code and click on the "Run" button to view the result.</p>
+
+<p id="demo"></p>
+
+<script>
+let sumDivide = n => {
+  
+  let distinctArr = new Array(n + 1).fill(false)
+  
+  let sumArr = arr => {
+    let sum = 0
+  	for(let ind = 1; ind < arr.length; ind++){
+    	sum += arr[ind] === true ? ind : 0
+    }
+    return sum
+  } 
+  
+  let convertArrToStr = arr => {
+    let str = ''
+  	for(let ind = 1; ind < arr.length; ind++){
+    	str += arr[ind] === true ? ind + '-' : ''
+    }
+    return str
+  }
+  
+  let result = new Set ()
+
+  let backtrack = pos => {
+        for(let ind = pos; ind < n; ind++){
+            if(!distinctArr[ind]){
+               if(sumArr(distinctArr) + ind < n){
+                   distinctArr[ind] = true
+			       backtrack(pos + 1)
+               }else{ 
+			      if(sumArr(distinctArr) + ind === n){
+			          distinctArr[ind] = true
+				      result.add(convertArrToStr(distinctArr))
+                  }
+               }
+               distinctArr[ind] = false
+            }
+		}
+  }
+  
+  backtrack(1)
+  
+  console.log(n + ' = ' , [...result])
+}
+
+console.log('Test 1');
+sumDivide(6)
+
+console.log('Test 2');
+sumDivide(10)
+
+console.log('Test 3');
+sumDivide(15)
+
+console.log('Test 4');
+sumDivide(5)
+
+console.log('Test 5');
+sumDivide(11)
+
+console.log('Test 6');
+sumDivide(7)
+
+console.log('Test 7');
+sumDivide(35)
+
+</script>
+
+</body>
+</html>
+
