@@ -44,7 +44,7 @@ public class SumDivide {
 
 				if (currTotal + ind < n) {
 					distinctValues[ind] = true;
-					backtracking(ind, n - currTotal + 1, n);
+					backtracking(ind + 1, n - currTotal + 1, n);
 					distinctValues[ind] = false;
 				} else if (currTotal + ind == n) {
 					result.add(convertToStr(distinctValues) + "-" + ind);
@@ -80,8 +80,8 @@ public class SumDivide {
 		printSet(result);
 
 		long startTime = System.currentTimeMillis();
-		System.out.println("Test 3, n = 100");
-		sumDivide(100);
+		System.out.println("Test 3, n = 120");
+		sumDivide(120);
 		// printSet(result);
 		System.out.println("Size " + result.size());
 
