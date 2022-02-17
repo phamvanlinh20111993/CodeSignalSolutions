@@ -79,7 +79,7 @@ const findAndReplace = (code1, code2, variables1, variables2)=>{
     const findPosition = (codesStr, variables) => {
         let result, indices = []
         variables.map(variable => {
-            const FIND_VARIABLE_PATTERN = new RegExp(`(?<=(?:\\W+|^))${variable}(?=(?:\\W+|$))`, 'gm')
+            const FIND_VARIABLE_PATTERN = new RegExp(`(?<=(?:\\W+|^))${variable}(?=(?:\\W+|$))`, 'g')
             while((result = FIND_VARIABLE_PATTERN.exec(codesStr)) ) {
                 indices.push([variable, result.index]);
             }
@@ -105,12 +105,9 @@ const findAndReplace = (code1, code2, variables1, variables2)=>{
     
     const diffsMap = new Map()
     variables1.map((v, ind) => diffsMap.set(v, variables2[ind]))
-    
-    const diffVar1 = Array.from(diffsMap.keys())
-    const diffVar2 = Array.from(diffsMap.values())
     const codesStr = code1.join('~')
     
-    return replace(codesStr, findPosition(codesStr, diffVar1), diffsMap) === code2.join('~')
+    return replace(codesStr, findPosition(codesStr, Array.from(diffsMap.keys())), diffsMap) === code2.join('~')
 }
 
 const getVariables = codes => {
