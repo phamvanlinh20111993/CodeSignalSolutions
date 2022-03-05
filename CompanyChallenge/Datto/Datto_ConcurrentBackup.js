@@ -32,3 +32,14 @@ concurrentBackups = (threads, documents) => {
     else
         return medianTime
 }
+
+
+solution = (threads, documents) => {
+    
+    documents = documents.sort((a,b) => a - b)
+    const totalSize = documents.reduce((t, v) => t += v, 0)
+    const maxTime = Math.max(...documents)
+    const averageTime = Math.ceil(totalSize/threads) 
+    
+    return averageTime > maxTime ? averageTime : maxTime
+}

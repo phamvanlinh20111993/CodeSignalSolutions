@@ -140,7 +140,7 @@ class ManageTask {
     	this.#manageTaskList
     	.filter(task => !this.#markTaskEndMap.has(task.index)) // task still running
     	.map((task, ind) => {
-    		const timeEnd = task.getTimeEnd(this.#speed/this.#currThread)
+    		const timeEnd = task.getTimeEnd(this.#speed/this.getCurrentThread())
     		if(timeEnd < minTime){
     			minTime = timeEnd
     			taskInd = ind
