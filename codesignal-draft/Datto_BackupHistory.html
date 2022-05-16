@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+    <html>
+    <body>
+    <script>
+
+class Task {
+    
+    #createdTime
+    #k
+    #backupAt = new Set()
+    #cancelT
+    #timeEnd
+    #isCancelAutoBackup
+
+    constructor(createdTime, k, t) {
+        this.#k = k
+        this.#createdTime = createdTime
+        this.#timeEnd = t
+        this.#isCancelAutoBackup = false
+    }
+
+    setCancelTime(cancelTime) {
+        if(!this.#isCancelAutoBackup){
+            this.#cancelT = cancelTime
+            this.#isCancelAutoBackup = true
+        } else {
+            this.#cancelT = this.#cancelT > cancelTime ? cancelTime : this.#cancelT
+        }
+    }
+
+    setManualBackup(manualBackupTime) {
+        manualBackupTime <= this.#timeEnd && this.#backupAt.add(manualBackupTime)
+    }
+
+    getTotalBackupTime() {
+        // v in range (a, b]
+        const isInRange = (v, range = [0, 0]) => v > range[0] &&  v <= range[1]
+        
+        const isConcideBackup = (v, leftRange, k) => (v - leftRange) % k === 0 
+        
+        // checked
+        const cancelT = this.#isCancelAutoBackup === true &&
+                        this.#timeEnd > this.#cancelT ? this.#cancelT : this.#timeEnd
+        const autoBackupRange = [this.#createdTime, cancelT]
+        
+        let amountAutoBackup = Math.floor((autoBackupRange[1] - autoBackupRange[0]) / this.#k)
+        amountAutoBackup = amountAutoBackup < 0 ? 0 : amountAutoBackup
+        let total = this.#backupAt.size + amountAutoBackup
+
+        // duplicate 
+         Array.from(this.#backupAt)
+         .map(v => isInRange(v, autoBackupRange) 
+                && isConcideBackup(v, autoBackupRange[0], this.#k) ? total-- : '')
+        
+        // duplicate 
+        if(this.#isCancelAutoBackup === true 
+            && cancelT > autoBackupRange[0]
+            && isConcideBackup(cancelT, autoBackupRange[0], this.#k)){
+            total --
+        }
+        
+        return total
+    }
+}
+
+class TaskManager {
+    #taskManager
+    #t
+    #k
+
+    constructor(t, k) {
+        this.#taskManager = new Array()
+        this.#t = t
+        this.#k = k
+    }
+
+    createTask(createTime) {
+        this.#taskManager.push(new Task(createTime, this.#k, this.#t))
+    }
+
+    /** [0, 1, 2] => [request type, request to file index, request time]**/
+    requestBackup(request = [0, 0, 0]) {
+        if (request.length < 3) {
+            throw Error("Request length array must be greater than or equal 3")
+        }
+        
+        const taskIndex = this.#taskManager[request[1]]
+        // cancel backup file
+        if (request[0] === 0) {
+            taskIndex.setCancelTime(request[2])
+            // manual backup file
+        } else {
+            taskIndex.setManualBackup(request[2])
+        }
+    }
+
+    getResult() {
+        return this.#taskManager.map(task => task.getTotalBackupTime())
+    }
+}
+
+
+
+solution = (creationTimes, backupRequests, k, t) => {
+    const taskManager = new TaskManager(t, k)
+    creationTimes.map(v => taskManager.createTask(v))
+
+    backupRequests
+    .map(request => taskManager.requestBackup(request))
+
+    return taskManager.getResult();
+}
+
+
+
+solution = (creationTimes, backupRequests, k, t) => {
+    const taskManager = new TaskManager(t, k)
+    creationTimes.map(v => taskManager.createTask(v))
+
+    backupRequests.sort((a, b) => a[2] - b[2])
+    .map(request => taskManager.requestBackup(request))
+
+    return taskManager.getResult();
+}
+
+
+
+
+	// Test1, output: [4, 3, 1]
+	const creationTimes = [461620201, 461620203, 461620207],
+		backupRequests = [
+			[1, 0, 461620202],
+			[1, 2, 461620208],
+			[0, 2, 461620210],
+			[1, 0, 461620204],
+			[1, 1, 461620209],
+			[1, 1, 461620203]
+		],
+		k = 3,
+		t = 461620210
+	console.log("############################## Test1, output: [4, 3, 1] ############################")
+	console.log('out: ', solution(creationTimes, backupRequests, k, t));
+
+
+
+	// Test2, output: [2, 0, 0, 0]
+	const creationTimes1 = [461620203, 461620206, 461620207, 461620214],
+		backupRequests1 = [
+			[1, 0, 461620205],
+			[1, 0, 461620206],
+			[1, 0, 461620210]
+		],
+		k1 = 2,
+		t1 = 461620206
+	console.log("############################## Test2, output: [2, 0, 0, 0] ############################")
+	console.log('out: ', solution(creationTimes1, backupRequests1, k1, t1));
+
+
+
+	// Test3, output: [39993, 39991, 163, 9899]
+	const creationTimes2 = [461620242, 461620255, 461620439, 461720700],
+		backupRequests2 = [
+			[1, 0, 461620253],
+			[1, 1, 461620255],
+			[0, 3, 461770200],
+			[0, 3, 461815200],
+			[1, 2, 461620783],
+			[1, 0, 461620434],
+			[1, 1, 461620302],
+			[0, 2, 461621253]
+		],
+		k2 = 5,
+		t2 = 461820200
+	console.log("############################## Test3, output: [39993, 39991, 163, 9899] ############################")
+	console.log('out: ', solution(creationTimes2, backupRequests2, k2, t2));
+
+
+
+</script></body></html>
