@@ -1,5 +1,5 @@
 /**
- * Url: https://app.codesignal.com/company-challenges/two-sigma/ekzXNgaHnSxBmuwSi
+ * Ref Url: https://app.codesignal.com/company-challenges/two-sigma/ekzXNgaHnSxBmuwSi
  * 
  * Two Sigma maintains a distributed computing cluster capable of handling many
  * different types of jobs. Some jobs are quite small (for instance MapReduce
