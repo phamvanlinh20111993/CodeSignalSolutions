@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+// Author Linh Pham Van
 public class EstimateTime {
 	
 	public static int estimateTime(int workingHours, int [] tasks) {
