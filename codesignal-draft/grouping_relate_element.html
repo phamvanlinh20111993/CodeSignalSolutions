@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+	let arr = [[1,2], [2,5], [1,3], [6, 8], [5,3], [12, 11], [11, 7], [7, 6], [2,4], [14, 18], [22, 17], [14, 17]];
+	console.log('input', arr)
+	const groupingPairArr = arr => {
+		let groupByMap = new Map() 
+		arr.map(v => {
+			groupByMap.has(v[0]) ? groupByMap.set(v[0], new Set([...groupByMap.get(v[0]), ...new Set([...v])])) : groupByMap.set(v[0], new Set([...v])) 
+			groupByMap.has(v[1]) ? groupByMap.set(v[1], new Set([...groupByMap.get(v[1]), ...new Set([...v])])) : groupByMap.set(v[1], new Set([...v]))
+		})
+		
+		let res = [],
+			index = 0,
+			isVisited = new Set();
+			
+		for (let [key, value] of groupByMap) {
+			if (!isVisited.has(key)) {
+				let initialSet = value,
+					initial = Array.from(initialSet),
+					ind = 0,
+					isIncrease = false;
+					
+				index === res.length && (res[index] = new Set())
+				// https://stackoverflow.com/questions/55460303/why-does-js-keep-insertion-order-in-set       
+				while (ind < initial.length) {
+					if (!isVisited.has(initial[ind])) {
+						isVisited.add(initial[ind]) 
+						res[index] = new Set([...res[index], ...groupByMap.get(initial[ind])]) 
+						Array.from(groupByMap.get(initial[ind])).map(v => initialSet.add(v)) 
+						initial = Array.from(initialSet) 
+						isIncrease = true
+					}
+					ind++
+				}
+				
+				isIncrease && index++;
+			}
+		}
+		
+		return res.filter(v => v.size !== 0)
+	}
+	
+	solution = (str, pairs) => {
+		// ignore same pairs. ex : [2, 3] <=> [3,2]    
+		let checkSamePair = new Set()
+		
+		pairs.map(v => {
+			const k = `${v[0]}-${v[1]}`
+			const kReverse = `${v[1]}-${v[0]}`
+			if (!checkSamePair.has(k) && !checkSamePair.has(kReverse)) {
+				checkSamePair.add(k)
+			}
+		}) 
+		
+		pairs = Array.from(checkSamePair).map(v => {
+			const s = v.split('-') 
+			return [+s[0], +s[1]]
+		})
+		// split pair to group having the same in common. ex:    
+		// [1, 3] have the same in common with [1, 5], [3,9], [7, 1],...    
+		const groupPairs = groupingPairArr(pairs) 
+		
+		console.log('dt', groupPairs)
+		// divide to check group    
+	/*	const groupPairsMap = new Map()    
+		groupPairs.map((group, ind) => {
+			Array.from(group).map(v => {
+				groupPairsMap.set(v, ind)
+			})
+		}) 
+		
+		console.log('groupPairsMap', groupPairsMap)
+		let checkDup = new Set() 
+		return Array.from(checkDup).sort((a, b) => b.localeCompare(a))[0]*/
+
+		const strCopy = str.split('');
+	    groupPairs.map((group, ind) => {
+		    let strArr = [], groupArr = Array.from(group)
+			groupArr.map(v => {
+				strArr.push(str[v-1])
+			})
+			
+			strArr = strArr.sort((a, b) => b.localeCompare(a))
+			groupArr = groupArr.sort((a,b) => a - b)
+			console.log('strArr', strArr, groupArr)
+			strArr.map((data, ind) =>{
+				strCopy[groupArr[ind]-1] = data
+			})
+		})
+		
+		return strCopy.join('')
+		
+	}
+	
+	// console.log('out ', solution('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', arr))
+	
+	let str =  "abdc", 
+	    pairs = [[1,4], [3,4]]
+	console.log('out', solution(str, pairs),solution(str, pairs) === 'dbca')
+	
+	let str1 =  "lvvyfrbhgiyexoirhunnuejzhesylojwbyatfkrv", 
+	    pairs1 = [[13,23],  [13,28], [15,20], [24,29], [6,7], [3,4], [21,30], [2,13], [12,15], [19,23], [10,19], [13,14], [6,16], [17,25], [6,21], [17,26], [5,6], [12,24]]
+	console.log('out', solution(str1, pairs1), solution(str1, pairs1) === 'lyyvurrhgxyzvonohunlfejihesiebjwbyatfkrv')
+	    
+</script>
+
+</body>
+</html>
+
