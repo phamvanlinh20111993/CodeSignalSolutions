@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+
+//  133334444.41e-31  => numberPaths = [133334444, 41, -31]
+const format = numberPaths => {
+    
+    let eNum = 0
+    
+	let matchingValidN = numberPaths[0].match(/-?[1-9]\d*$/)
+	numberPaths[0] = matchingValidN ? matchingValidN[0] : "0"
+	
+    if(numberPaths[2] != ''){
+        eNum = parseInt(numberPaths[2])
+		numberPaths[2] = ""
+    }
+    
+    if(eNum > 0){
+	    let rest = eNum - numberPaths[1].length
+		if(rest > 0){
+			numberPaths[0] = `${numberPaths[0]}${numberPaths[1]}${"0".repeat(rest)}`
+			numberPaths[1] = ""
+		}else{
+		    rest = Math.abs(eNum) 
+			numberPaths[0] = `${numberPaths[0]}${numberPaths[1].substring(0, eNum)}`
+			numberPaths[1] = numberPaths[1].substring(eNum)
+		}
+    }
+    
+    if(eNum < 0){    
+        const eNumAbs = Math.abs(eNum)
+		const absData = numberPaths[0].includes("-") ? numberPaths[0].substring(1) : numberPaths[0]
+        if(eNumAbs > numberPaths[0].length){
+			numberPaths[1] = "0".repeat(eNumAbs - absData.length) + numberPaths[0] + numberPaths[1]
+            numberPaths[0] = "0"
+        }else{
+		    const rest = absData.length - eNumAbs 
+			numberPaths[1] = numberPaths[0].substring(rest) + numberPaths[1]
+            numberPaths[0] = numberPaths[0].substring(0, rest)
+        }
+    }
+	
+	console.log('numberPaths 1', numberPaths)
+    
+    if(numberPaths[1] != ''){
+        numberPaths[1] = `${parseFloat("0." + numberPaths[1]).toFixed(2)}`.split(".")[1]
+    }
+    
+    const num = `${numberPaths[0]}.${numberPaths[1].length > 0 ? numberPaths[1] : "00"}`
+    const FP = /(\d)(?=(?:(?:\d{3})+\.))/g
+    
+    return num.replace(FP, "$1,")
+}
+
+
+function solution(number) {
+    const NP = /^(-?\d+)(?:\.(\d+))?(?:e(-?[1-9]\d*))?$/
+    if(!NP.test(number)){
+        return "Not a right number"
+    }
+    const numberPaths = ["", "", ""]
+    const matchN = number.match(NP)
+
+    numberPaths[0] = matchN[1]
+    numberPaths[1] = matchN[2] ? matchN[2] : numberPaths[1]
+    numberPaths[2] = matchN[3] ? matchN[3] : numberPaths[2]
+ 	
+    console.log('numberPaths', numberPaths)
+    
+    return "$" + format(numberPaths)
+}
+
+ console.log("#################################################")
+ console.log(solution("100000000000000000000000000000"))
+
+ console.log("#################################################")
+ console.log(solution("100000000.1231312"))
+
+ console.log("#################################################")
+ console.log(solution("10.2e10"))
+ 
+ console.log("#################################################")
+ console.log(solution("10.22e23"))
+ 
+ console.log("#################################################")
+ console.log(solution("10.22e-2"))
+ 
+ console.log("#################################################")
+ console.log(solution("10.22e-12"))
+ 
+ console.log("#################################################")
+ console.log(solution("1035345435345.2245e-6"))
+ 
+ console.log("#################################################")
+ console.log(solution("-21.4234324e4"))
+ 
+ console.log("#################################################")
+ console.log(solution("-21.4234324e14"))
+ 
+ console.log("#################################################")
+ console.log(solution("0"))
+ 
+ console.log("#################################################")
+ console.log(solution("1232.323e-12"))
+
+
+ console.log("#################################################")
+ console.log(solution("1232362.323e-4"))
+ 
+ console.log("#################################################")
+ console.log(solution("1232362.323e-8"))
+
+ console.log("#################################################")
+ console.log(solution("7232362.323e-8"))
+ 
+ console.log("#################################################")
+ console.log(solution("7232369999999999999999999999999999999999992.324444444444444444443e-18"))
+ 
+ console.log("#################################################")
+ console.log(solution("7232369999999999999999999999999999999999992.324444444444444444443e18"))
+ 
+  console.log("#################################################")
+ console.log(solution("7232369999999999999999999999999999999999992.324444444444444444443e28"))
+
+</script>
+
+</body>
+</html>
