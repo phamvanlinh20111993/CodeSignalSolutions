@@ -2,13 +2,23 @@ package Hackerrank.Recursion;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
  * 
  * @author PhamLinh
  * @Url https://www.hackerrank.com/challenges/crossword-puzzle/problem?isFullScreen=true
+ * 
+ *      Many flaws but this problem is just medium
  *
  */
 
@@ -16,7 +26,7 @@ class Point {
 
 	private int x;
 	private int y;
-	
+
 	public Point() {
 		super();
 	}
@@ -46,107 +56,101 @@ class Point {
 	public int distance(Point A) {
 		return Math.abs(A.getX() - this.x) + Math.abs(A.getY() - this.y);
 	}
-}
 
-class WordsInCrosswordGrid {
-	private Point start;
-	private Point end;
-	private List<Point> intersections = new ArrayList<Point>();
-
-	public WordsInCrosswordGrid(Point start, Point end, List<Point> intersections) {
-		super();
-		this.start = start;
-		this.end = end;
-		this.intersections = intersections;
+	@Override
+	public int hashCode() {
+		return Objects.hash(x, y);
 	}
 
-	public void setStart(Point start) {
-		this.start = start;
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Point other = (Point) obj;
+		return x == other.x && y == other.y;
 	}
 
-	public Point getEnd() {
-		return end;
-	}
-
-	public void setEnd(Point end) {
-		this.end = end;
-	}
-
-	public List<Point> getIntersections() {
-		return intersections;
-	}
-
-	public void setIntersections(List<Point> intersections) {
-		this.intersections = intersections;
-	}
-
-	public Point getStart() {
-		return start;
-	}
-
-	public int wordlength() {
-		return this.start.distance(end);
+	@Override
+	public String toString() {
+		return "Point [x=" + x + ", y=" + y + "]";
 	}
 }
 
 public class CrosswordPuzzle {
 
-	public static List<String> findWordStartWith(String start, List<String> wordList, int length) {
-		return wordList.stream().filter(data -> {
-			return (start != null ? data.startsWith(start) : true) && data.length() == length;
-		}).collect(Collectors.toList());
+	public static List<List<String>> res;
+
+	public static List<Point> getMaxStrictIncreasingList(List<Point> points) {
+
+		int max = 0, fromInd = 0, endInd = points.size();
+		for (int ind = 0; ind < points.size();) {
+			int start = ind;
+
+			while (start + 1 < points.size() && points.get(start).distance(points.get(start + 1)) == 1) {
+				start++;
+			}
+			if (start - ind == 0) {
+				ind++;
+			} else {
+				if (max < start - ind) {
+					max = start - ind;
+					fromInd = ind;
+					endInd = start + 1;
+				}
+				ind = start + 1;
+			}
+		}
+
+		if (max == 0) {
+			return new ArrayList<>();
+		}
+
+		return points.subList(fromInd, endInd);
 	}
 
-	public static List<WordsInCrosswordGrid> find(List<List<String>> crosswordArr) {
-		List<WordsInCrosswordGrid> wordsGrid = new ArrayList<>();
-		List<List<Boolean>> isVisited = crosswordArr.stream().map(row -> {
-			return row.stream().map(v -> false).collect(Collectors.toList());
-		}).collect(Collectors.toList());
+	public static List<List<Point>> findPoints(List<List<String>> crosswordArr) {
 
+		Map<String, Set<Point>> mapPoints = new HashMap<>();
 		for (int r = 0; r < crosswordArr.size(); r++) {
 			for (int c = 0; c < crosswordArr.get(r).size(); c++) {
 				String data = crosswordArr.get(r).get(c);
-				if (data.equals("-") && !isVisited.get(r).get(c)) {
-					isVisited.get(r).set(c, true);
-					recursion(new Point(r, c), crosswordArr, wordsGrid, isVisited);
+				if (data.equals("-")) {
+					Set<Point> groupPointsX = mapPoints.containsKey("x-" + r) ? mapPoints.get("x-" + r)
+							: new TreeSet<>(new Comparator<Point>() {
+								@Override
+								public int compare(Point o1, Point o2) {
+									return o1.getX() == o2.getX() ? o1.getY() - o2.getY() : o1.getX() - o2.getX();
+								}
+							});
+					groupPointsX.add(new Point(r, c));
+					Set<Point> groupPointsY = mapPoints.containsKey("y-" + c) ? mapPoints.get("y-" + c)
+							: new TreeSet<>(new Comparator<Point>() {
+								@Override
+								public int compare(Point o1, Point o2) {
+									return o1.getX() == o2.getX() ? o1.getY() - o2.getY() : o1.getX() - o2.getX();
+								}
+							});
+					groupPointsY.add(new Point(r, c));
+
+					mapPoints.put("x-" + r, groupPointsX);
+					mapPoints.put("y-" + c, groupPointsY);
 				}
 			}
 		}
 
-		return wordsGrid;
-	}
-
-	public static void recursion(Point start, List<List<String>> crosswordArr, List<WordsInCrosswordGrid> wordsGrid,
-			List<List<Boolean>> isVisited) {
-		int left, right, top, down, x = start.getX(), y = start.getY();
-
-		left = y - 1;
-		while (left >= 0 && crosswordArr.get(x).get(left).equals("-")) {
-			isVisited.get(x).set(left, true);
-			left--;
-		}
-		
-		Point entry = new Point();
-		if(left == y-1) {
-			
+		List<List<Point>> points = new ArrayList<>();
+		for (Map.Entry<String, Set<Point>> entry : mapPoints.entrySet()) {
+			List<Point> pointSets = getMaxStrictIncreasingList(new ArrayList<>(entry.getValue()));
+			if (pointSets.size() > 1) {
+				points.add(pointSets);
+			}
 		}
 
-		right = y + 1;
-		while (right < crosswordArr.get(x).size() && crosswordArr.get(x).get(right).equals("-")) {
-			isVisited.get(x).set(right, true);
-			right++;
-		}
-
-		top = x - 1;
-		while (top >= 0 && crosswordArr.get(top).get(y).equals("-")) {
-			top--;
-		}
-
-		down = x + 1;
-		while (down < crosswordArr.size() && crosswordArr.get(down).get(y).equals("-")) {
-			down++;
-		}
-
+		return points;
 	}
 
 	public static List<String> crosswordPuzzle(List<String> crossword, String words) {
@@ -155,12 +159,116 @@ public class CrosswordPuzzle {
 			return Arrays.asList(word.split(""));
 		}).collect(Collectors.toList());
 
-		List<String> wordList = Arrays.asList(words.split(";"));
+		res = new ArrayList<>();
 
-		return crossword;
+		List<String> wordList = Arrays.asList(words.split(";"));
+		List<List<Point>> points = findPoints(crosswordArr);
+
+		// points.forEach(point -> System.out.println(point));
+
+		recursion(wordList, points, 0, crosswordArr);
+
+		res.forEach(crossWord -> {
+			crossWord.forEach(v -> System.out.print(v));
+			System.out.println();
+		});
+
+		return res.stream().map(data -> {
+			return String.join("", data);
+		}).collect(Collectors.toList());
+	}
+
+	public static void recursion(List<String> wordList, List<List<Point>> points, int ind,
+			List<List<String>> crosswordArr) {
+
+		if (ind == points.size()) {
+			res = crosswordArr;
+			return;
+		}
+
+		List<Point> currentPoints = points.get(ind);
+		List<String> wordFitLength = wordList.stream().filter(word -> word.length() == currentPoints.size())
+				.collect(Collectors.toList());
+
+		for (int pos = 0; pos < wordFitLength.size(); pos++) {
+			String wordS = wordFitLength.get(pos);
+			boolean isWrong = false;
+			for (int id = 0; id < currentPoints.size(); id++) {
+				Point p = currentPoints.get(id);
+				String val = crosswordArr.get(p.getX()).get(p.getY());
+				String fill = String.valueOf(wordS.charAt(id));
+				if (!val.equals("-") && !val.equals(fill)) {
+					isWrong = true;
+					break;
+				}
+			}
+
+			if (!isWrong) {
+
+				List<List<String>> crosswordArrTmp = crosswordArr.stream()
+						.map(s -> s.stream().map(t -> t).collect(Collectors.toList())).collect(Collectors.toList());
+
+				for (int id = 0; id < currentPoints.size(); id++) {
+					Point p = currentPoints.get(id);
+					crosswordArrTmp.get(p.getX()).set(p.getY(), String.valueOf(wordS.charAt(id)));
+				}
+
+				recursion(wordList.stream().filter(w -> !w.equals(wordS)).collect(Collectors.toList()), points, ind + 1,
+						crosswordArrTmp.stream().map(s -> s.stream().map(t -> t).collect(Collectors.toList()))
+								.collect(Collectors.toList()));
+			}
+		}
 	}
 
 	public static void main(String[] args) {
+
+		System.out.println("######################### test 1 #########################");
+		List<String> crossword = new ArrayList<>();
+		crossword.add("++++++++++");
+		crossword.add("+------+++");
+		crossword.add("+++-++++++");
+		crossword.add("+++-++++++");
+		crossword.add("+++-----++");
+		crossword.add("+++-++-+++");
+		crossword.add("++++++-+++");
+		crossword.add("++++++-+++");
+		crossword.add("++++++-+++");
+		crossword.add("++++++++++");
+		String words = "POLAND;LHASA;SPAIN;INDIA";
+
+		crosswordPuzzle(crossword, words);
+
+		System.out.println("######################### test 2 #########################");
+		List<String> crossword1 = new ArrayList<>();
+		crossword1.add("++++++-+++");
+		crossword1.add("++------++");
+		crossword1.add("++++++-+++");
+		crossword1.add("++++++-+++");
+		crossword1.add("+++------+");
+		crossword1.add("++++++-+-+");
+		crossword1.add("++++++-+-+");
+		crossword1.add("++++++++-+");
+		crossword1.add("++++++++-+");
+		crossword1.add("++++++++-+");
+		String words1 = "ICELAND;MEXICO;PANAMA;ALMATY";
+
+		crosswordPuzzle(crossword1, words1);
+
+		System.out.println("######################### test 3 #########################");
+		List<String> crossword2 = new ArrayList<>();
+		crossword2.add("+-++++++++");
+		crossword2.add("+-++++++++");
+		crossword2.add("+-------++");
+		crossword2.add("+-++++++++");
+		crossword2.add("+-++++++++");
+		crossword2.add("+------+++");
+		crossword2.add("+-+++-++++");
+		crossword2.add("+++++-++++");
+		crossword2.add("+++++-++++");
+		crossword2.add("++++++++++");
+		String words2 = "AGRA;NORWAY;ENGLAND;GWALIOR";
+
+		crosswordPuzzle(crossword2, words2);
 
 	}
 

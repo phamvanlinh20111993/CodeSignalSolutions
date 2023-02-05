@@ -82,9 +82,7 @@ public class RecursiveDigitSum {
 		for (int ind = 0; ind < n.length(); ind++) {
 			cal += (int) (n.charAt(ind) - '0');
 		}
-
 		String strV = String.valueOf(cal);
-
 		if (strV.length() > 1)
 			return rescursion(strV);
 		else

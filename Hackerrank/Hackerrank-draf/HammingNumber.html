@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>My Heading</h2>
+
+<p>Play around with the code and click on the "Run" button to view the result.</p>
+
+<p id="demo"></p>
+
+<script>
+let firstNum = 1;
+
+let n = 2;
+
+let isHammingNumber = t => {
+    
+    let m= t
+   if(t%2!=0&&t%5!=0&&t%3!=0&&t%6!=0&&t%10 != 0&&t%15 !=0&&t%30!=0) return false
+    
+   let a = 0, b = 0,c = 0
+   while(t%2 == 0){
+     t = t/2
+     a++
+   }
+   while(t%3 == 0){
+    t = t/3
+    b++
+   }
+   while(t%5 == 0){
+      t = t/5
+      c++
+   }
+   
+   
+   if(t ==1){
+    console.log(`${m} = 2^${a} * 3^${b} * 5^${c}`)
+   }
+   
+   return t == 1;
+}
+
+let findN = n => {
+    count = 2;
+    
+    while(count < n){
+        let nextNum = firstNum + 1
+        while(!isHammingNumber(nextNum)) nextNum++;
+        firstNum = nextNum;
+        count++;
+    }
+    
+    return firstNum;
+}
+
+console.log(findN(1000));
+
+
+</script>
+
+</body>
+</html>
