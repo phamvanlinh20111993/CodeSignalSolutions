@@ -74,6 +74,8 @@ class AVLNode<T> {
 
     private int currNodeHeight = 0;
 
+    private int balanceFactor = 0;
+
     public AVLNode() {
 
     }
@@ -114,6 +116,53 @@ class AVLNode<T> {
 	this.currNodeHeight = currNodeHeight;
     }
 
+    public int getBalanceFactor() {
+	return balanceFactor;
+    }
+
+    public void setBalanceFactor(int balanceFactor) {
+	this.balanceFactor = balanceFactor;
+    }
+
+    /**
+     *  *  * @param node  * @return  
+     */
+
+    public boolean hasAllChild() {
+	return this.hasLeftChild() && this.hasRightChild();
+    }
+
+    /**
+     *  *  * @return  
+     */
+
+    public boolean hasNoneChild() {
+	return !this.hasLeftChild() && !this.hasRightChild();
+    }
+
+    /**
+     *  *  * @param node  * @return  
+     */
+
+    public boolean hasLeftChild() {
+	return this.getLeftAVLNodes() != null;
+    }
+
+    /**
+     *  *  * @param node  * @return  
+     */
+
+    public boolean hasRightChild() {
+	return this.getRightAVLNodes() != null;
+    }
+
+    /**
+     *  *  * @return  
+     */
+
+    public boolean dataIsNull() {
+	return this.getData() == null;
+    }
 }
 
 /**
@@ -149,7 +198,8 @@ class AVLTree<T> {
      */
     public void addNodes(List<T> nodes) {
 	for (T node : nodes) {
-	    this.addNode(node);
+	    // this.addNode(node);
+	    this.insertNode(node);
 	}
     }
 
@@ -163,16 +213,101 @@ class AVLTree<T> {
 	    this.AVLNode.setCurrNodeHeight(0);
 	    return;
 	}
-	AVLNode<T> rootNode = findMatchParentNode(this.AVLNode, node);
+	/*
+	 * AVLNode<T> rootNode = findMatchParentNode(this.AVLNode, node);
+	 * 
+	 * if (rootNode != null) { int factor = this.compare(rootNode.getData(), node);
+	 * if (factor > 0) { rootNode.setLeftAVLNodes(new AVLNode<T>(node)); } else {
+	 * rootNode.setRightAVLNodes(new AVLNode<T>(node)); } }
+	 */
+	insert(this.AVLNode, node);
+    }
 
-	if (rootNode != null) {
-	    int factor = this.compare(rootNode.getData(), node);
-	    if (factor > 0) {
-		rootNode.setLeftAVLNodes(new AVLNode<T>(node));
-	    } else {
-		rootNode.setRightAVLNodes(new AVLNode<T>(node));
+    /**
+     * 
+     * @param tree
+     * @param node
+     */
+    private void insert(AVLNode<T> tree, T node) {
+	int factor = this.compare(tree.getData(), node);
+
+	if (factor > 0) {
+	    if (tree.hasLeftChild()) {
+		insert(tree.getLeftAVLNodes(), node);
+	    }
+	} else {
+	    if (tree.hasRightChild()) {
+		insert(tree.getRightAVLNodes(), node);
 	    }
 	}
+
+	if (factor > 0 && !tree.hasLeftChild()) {
+	    tree.setLeftAVLNodes(new AVLNode<T>(node));
+	} else if (factor < 0 && !tree.hasRightChild()) {
+	    tree.setRightAVLNodes(new AVLNode<T>(node));
+	}
+
+	tree.setCurrNodeHeight(updateHeight(tree) + 1);
+	
+	int balanceFactor = updateBalanceFactor(tree);
+	
+	if(balanceFactor > 1 || balanceFactor < -1) {
+	    System.out.println("Not balance " + balanceFactor);
+	    reBalanceTree(this.AVLNode);
+	    
+	}
+	
+	tree.setBalanceFactor(balanceFactor);
+    }
+
+    /**
+     * 
+     * @param rootNode
+     * @return
+     */
+    private Integer updateHeight(AVLNode<T> rootNode) {
+	int leftHeight = 0;
+	if (rootNode.hasLeftChild()) {
+	    leftHeight = rootNode.getLeftAVLNodes().getCurrNodeHeight();
+	}
+
+	int rightHeight = 0;
+	if (rootNode.hasRightChild()) {
+	    rightHeight = rootNode.getRightAVLNodes().getCurrNodeHeight();
+	}
+
+	return Math.max(leftHeight, rightHeight);
+    }
+
+    /**
+     * 
+     * @param rootNode
+     * @return
+     */
+    private Integer updateBalanceFactor(AVLNode<T> rootNode) {
+	int leftHeight = 0;
+	if (rootNode.hasLeftChild()) {
+	    leftHeight = rootNode.getLeftAVLNodes().getCurrNodeHeight();
+	}
+
+	int rightHeight = 0;
+	if (rootNode.hasRightChild()) {
+	    rightHeight = rootNode.getRightAVLNodes().getCurrNodeHeight();
+	}
+
+	return leftHeight - rightHeight;
+    }
+    
+    /**
+     * //TODO
+     * @param rootNode
+     */
+    private void reBalanceTree(AVLNode<T> rootNode) {
+	// TODO RR
+	// TODO LR
+	// TODO RL
+	// TODO LL
+	
     }
 
     /**
@@ -199,59 +334,77 @@ class AVLTree<T> {
 	if (deletedNode == null) {
 	    return null;
 	}
-
-	if (!hasAllChild(deletedNode) && parentNode != null) {
-	    if (this.compare(parentNode.getLeftAVLNodes().getData(), node) == 0) {
+	/**
+	 * If deleted node was not has any child, remove itself and then return parent
+	 * node
+	 */
+	if (deletedNode.hasNoneChild() && parentNode != null) {
+	    if (parentNode.hasLeftChild() && this.compare(parentNode.getLeftAVLNodes().getData(), node) == 0) {
 		parentNode.setLeftAVLNodes(null);
 	    }
-
-	    if (this.compare(parentNode.getRightAVLNodes().getData(), node) == 0) {
+	    if (parentNode.hasRightChild() && this.compare(parentNode.getRightAVLNodes().getData(), node) == 0) {
 		parentNode.setRightAVLNodes(null);
+	    }
+	    return node;
+	}
+	/**
+	 * find the largest node on the left side
+	 */
+	if (deletedNode.hasLeftChild()) {
+	    AVLNode<T> parentDelNode = deletedNode;
+	    AVLNode<T> leftNode = deletedNode.getLeftAVLNodes();
+	    while (leftNode.hasRightChild()) {
+		parentDelNode = leftNode;
+		leftNode = leftNode.getRightAVLNodes();
+	    }
+	    deletedNode.setData(leftNode.getData());
+
+	    AVLNode<T> data = null;
+	    if (leftNode.hasLeftChild()) {
+		data = leftNode.getLeftAVLNodes();
+	    }
+
+	    if (parentDelNode.hasLeftChild()
+		    && this.compare(parentDelNode.getLeftAVLNodes().getData(), leftNode.getData()) == 0) {
+		parentDelNode.setLeftAVLNodes(data);
+	    }
+
+	    if (parentDelNode.hasRightChild()
+		    && this.compare(parentDelNode.getRightAVLNodes().getData(), leftNode.getData()) == 0) {
+		parentDelNode.setRightAVLNodes(data);
 	    }
 
 	    return node;
-
 	}
 
-	// TODO
-
-	return null;
-
-    }
-
-    /**
-     * 
-     * @return
-     */
-    private AVLNode<T> findLargestLeftNode() {
-	AVLNode<T> root = this.AVLNode;
-
-	if (root != null && root.getLeftAVLNodes() != null) {
-	    root = root.getLeftAVLNodes();
-	    while (root.getRightAVLNodes() != null) {
-		root = root.getRightAVLNodes();
+	/**
+	 * find the smallest node on the right side
+	 */
+	if (deletedNode.hasRightChild()) {
+	    AVLNode<T> parentDelNode = deletedNode;
+	    AVLNode<T> rightNode = deletedNode.getRightAVLNodes();
+	    while (rightNode.hasLeftChild()) {
+		parentDelNode = rightNode;
+		rightNode = rightNode.getLeftAVLNodes();
 	    }
 
-	    return root;
-	}
-
-	return null;
-
-    }
-
-    /**
-     * 
-     * @return
-     */
-    private AVLNode<T> findSmallestRightNode() {
-	AVLNode<T> root = this.AVLNode;
-	if (root != null && root.getRightAVLNodes() != null) {
-	    root = root.getRightAVLNodes();
-	    while (root.getLeftAVLNodes() != null) {
-		root = root.getLeftAVLNodes();
+	    deletedNode.setData(rightNode.getData());
+	    AVLNode<T> data = null;
+	    if (rightNode.hasRightChild()) {
+		data = rightNode.getRightAVLNodes();
 	    }
 
-	    return root;
+	    if (parentDelNode.hasLeftChild()
+		    && this.compare(parentDelNode.getLeftAVLNodes().getData(), rightNode.getData()) == 0) {
+		parentDelNode.setLeftAVLNodes(data);
+	    }
+
+	    if (parentDelNode.hasRightChild()
+		    && this.compare(parentDelNode.getRightAVLNodes().getData(), rightNode.getData()) == 0) {
+		parentDelNode.setRightAVLNodes(data);
+	    }
+
+	    return node;
 	}
 
 	return null;
@@ -320,7 +473,7 @@ class AVLTree<T> {
      */
     private void addNode(T node) {
 
-	if (this.AVLNode.getData() == null) {
+	if (this.AVLNode.dataIsNull()) {
 	    this.AVLNode.setData(node);
 	    this.AVLNode.setCurrNodeHeight(0);
 	    return;
@@ -333,14 +486,14 @@ class AVLTree<T> {
 	    int factor = this.compare(traverseNode.getData(), node);
 	    if (factor > 0) {
 		isChildLeft = true;
-		if (traverseNode.getLeftAVLNodes() == null)
+		if (!traverseNode.hasLeftChild())
 		    break;
 		traverseNode = traverseNode.getLeftAVLNodes();
 	    } else if (factor == 0) {
 		return;
 	    } else {
 		isChildLeft = false;
-		if (traverseNode.getRightAVLNodes() == null)
+		if (!traverseNode.hasRightChild())
 		    break;
 		traverseNode = traverseNode.getRightAVLNodes();
 	    }
@@ -362,12 +515,12 @@ class AVLTree<T> {
     private AVLNode<T> findMatchParentNode(AVLNode<T> rootNode, T node) {
 	int compareFactor = this.compare(rootNode.getData(), node);
 	if (compareFactor > 0) {
-	    if (rootNode.getLeftAVLNodes() != null) {
+	    if (rootNode.hasLeftChild()) {
 		return findMatchParentNode(rootNode.getLeftAVLNodes(), node);
 	    }
 	    return rootNode;
 	} else if (compareFactor < 0) {
-	    if (rootNode.getRightAVLNodes() != null) {
+	    if (rootNode.hasRightChild()) {
 		return findMatchParentNode(rootNode.getRightAVLNodes(), node);
 	    }
 	    return rootNode;
@@ -412,12 +565,11 @@ class AVLTree<T> {
 	}
 	int compareFactor = this.compare(rootNode.getData(), searchData);
 	if (compareFactor == 0) {
-
 	    return Arrays.asList(parentNode, rootNode);
 	} else if (compareFactor < 0) {
-	    return findPreviousNode(parentNode, rootNode.getRightAVLNodes(), searchData);
+	    return findPreviousNode(rootNode, rootNode.getRightAVLNodes(), searchData);
 	} else {
-	    return findPreviousNode(parentNode, rootNode.getLeftAVLNodes(), searchData);
+	    return findPreviousNode(rootNode, rootNode.getLeftAVLNodes(), searchData);
 	}
     }
 
@@ -430,12 +582,14 @@ class AVLTree<T> {
 	if (node == null)
 	    return;
 	if (level == 0) {
-	    System.out.println("---ROOT: " + node.getData());
+	    System.out.println(
+		    "---ROOT: " + node.getData() + "#" + node.getCurrNodeHeight() + "#" + node.getBalanceFactor());
 	} else {
 	    for (int ind = 0; ind <= level; ind++) {
 		System.out.print("----");
 	    }
-	    System.out.print("NODE: " + node.getData());
+	    System.out
+		    .print("NODE: " + node.getData() + "#" + node.getCurrNodeHeight() + "#" + node.getBalanceFactor());
 	    System.out.println();
 	}
 	dfsPrint(node.getLeftAVLNodes(), level + 1);
@@ -465,11 +619,11 @@ class AVLTree<T> {
 		level = tupleNode.getValue();
 	    }
 
-	    if (tupleNode.getKey().getLeftAVLNodes() != null) {
+	    if (tupleNode.getKey().hasLeftChild()) {
 		queue.add(new Tuples<>(tupleNode.getKey().getLeftAVLNodes(), tupleNode.getValue() + 1));
 	    }
 
-	    if (tupleNode.getKey().getRightAVLNodes() != null) {
+	    if (tupleNode.getKey().hasRightChild()) {
 		queue.add(new Tuples<>(tupleNode.getKey().getRightAVLNodes(), tupleNode.getValue() + 1));
 	    }
 	}
@@ -483,11 +637,11 @@ class AVLTree<T> {
      * @param res
      */
     private void inorderTraversal(AVLNode<T> node, List<T> res) {
-	if (node.getLeftAVLNodes() != null) {
+	if (node.hasLeftChild()) {
 	    inorderTraversal(node.getLeftAVLNodes(), res);
 	}
 	res.add(node.getData());
-	if (node.getRightAVLNodes() != null) {
+	if (node.hasRightChild()) {
 	    inorderTraversal(node.getRightAVLNodes(), res);
 	}
     }
@@ -517,36 +671,9 @@ class AVLTree<T> {
 	return comparator == null ? ((Comparable<T>) k1).compareTo(k2) : comparator.compare(k1, k2);
     }
 
-    /**
-     * 
-     * @param node
-     * @return
-     */
-    private boolean hasAllChild(AVLNode<T> node) {
-	return hasLeftChild(node) && hasRightChild(node);
-    }
-
-    /**
-     * 
-     * @param node
-     * @return
-     */
-    private boolean hasLeftChild(AVLNode<T> node) {
-	return node.getLeftAVLNodes() != null;
-    }
-
-    /**
-     * 
-     * @param node
-     * @return
-     */
-    private boolean hasRightChild(AVLNode<T> node) {
-	return node.getRightAVLNodes() != null;
-    }
-
 }
 
-public class TheBalanceTree {
+public class SelfBalanceTree {
 
     public static void main(String[] args) {
 	AVLTree<Integer> avlTree = new AVLTree<Integer>();
@@ -555,10 +682,15 @@ public class TheBalanceTree {
 	avlTree.insertNode(25);
 	avlTree.insertNode(12);
 	avlTree.insertNode(244);
+	avlTree.print();
+
 	avlTree.insertNode(144);
 	avlTree.insertNode(2466);
 	avlTree.insertNode(40);
 	avlTree.insertNode(2444);
+	avlTree.insertNode(39);
+	avlTree.insertNode(35);
+	avlTree.insertNode(31);
 
 	avlTree.addNodes(Arrays.asList(2466, 1, 2, 3, 4, 5, 6, 30));
 
@@ -568,6 +700,25 @@ public class TheBalanceTree {
 	avlTree.sortedTree().forEach(v -> System.out.print(v + " "));
 	System.out.println("\n################### Get sorted data using advanced methodology");
 	avlTree.sortedTreeAdvance().forEach(v -> System.out.print(v + " "));
+
+	System.out.println("\n################### Remove node ");
+	// PASS
+	// avlTree.deleteNode(30);
+	// PASS
+	// avlTree.deleteNode(6);
+	// PASS
+	// avlTree.deleteNode(3);
+	// PASS
+	// avlTree.deleteNode(244);
+	// PASS
+	// avlTree.deleteNode(21);
+	// PASS
+	// avlTree.deleteNode(12);
+	// PASS
+	avlTree.deleteNode(1);
+
+	avlTree.print();
+	avlTree.sortedTree().forEach(v -> System.out.print(v + " "));
     }
 
 }
