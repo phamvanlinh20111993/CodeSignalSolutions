@@ -164,7 +164,7 @@ class Node {
 
 	@Override
 	public String toString() {
-		return "Node [data=" + data + ", childList=" + childList + ", parentIndex=" + parentIndex + ", totalChild="
+		return "Node1 [data=" + data + ", childList=" + childList + ", parentIndex=" + parentIndex + ", totalChild="
 				+ totalChild + ", curentIndex=" + curentIndex + "]";
 	}
 

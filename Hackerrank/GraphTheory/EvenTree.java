@@ -103,7 +103,7 @@ public class EvenTree {
 	}
 
 	storageAmountChildNode.put(root, count);
-	// System.out.println("root: " + root + ", total child Node: " + count);
+	// System.out.println("root: " + root + ", total child Node1: " + count);
     }
 
     // Complete the evenForest function below.
