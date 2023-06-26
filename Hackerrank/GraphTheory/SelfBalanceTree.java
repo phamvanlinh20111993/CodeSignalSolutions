@@ -194,8 +194,6 @@ class AVLTree<T> {
      * 
      * @param node
      */
-    private static boolean isF = false;
-
     public void insertNode(T node) {
 	if (this.AVLNode.getData() == null) {
 	    this.AVLNode.setData(node);
@@ -209,14 +207,21 @@ class AVLTree<T> {
 	 * if (factor > 0) { rootNode.setLeftAVLNodes(new AVLNode<T>(node)); } else {
 	 * rootNode.setRightAVLNodes(new AVLNode<T>(node)); } }
 	 */
-	isF = false;
 	insert(this.AVLNode, node);
     }
-    
-    // TODO need reduce, re-caculate the updateHeigh() function tree after re-balance:
-    // O(n) => O(nlogn)
+
     /**
      * Insert node to the binary tree and operate balance tree
+     * <p>
+     * *) Complexity:
+     * <p>
+     * +) insert itself using recursion: 1*n*log(n)
+     * <p>
+     * +) reBalanceTree() function: O(1)
+     * <p>
+     * +) updateTreeHeight() function: 1*n*log(n)
+     * <p>
+     * => remove updateTreeHeight() function only take n*log(n) complexity
      * 
      * @param tree
      * @param node
@@ -225,14 +230,11 @@ class AVLTree<T> {
 
 	int factor = this.compare(tree.getData(), node);
 
-	if (factor > 0) {
-	    if (tree.hasLeftChild()) {
-		insert(tree.getLeftAVLNodes(), node);
-	    }
-	} else {
-	    if (tree.hasRightChild()) {
-		insert(tree.getRightAVLNodes(), node);
-	    }
+	if (factor > 0 && tree.hasLeftChild()) {
+	    insert(tree.getLeftAVLNodes(), node);
+
+	} else if (factor < 0 && tree.hasRightChild()) {
+	    insert(tree.getRightAVLNodes(), node);
 	}
 
 	if (factor != 0) {
@@ -246,33 +248,14 @@ class AVLTree<T> {
 	    }
 	}
 
-	tree.setCurrNodeHeight(updateHeight(tree) + 1);
+	tree.setCurrNodeHeight(updateHeight(tree));
 
-	if (isF) {
-	    return;
-	}
-
-	int balanceFactor = updateBalanceFactor(tree);
+	int balanceFactor = getBalanceFactor(tree);
 
 	if (balanceFactor > 1 || balanceFactor < -1) {
 	    reBalanceTree(tree, node);
-	    updateTreeHeight(tree);
-	    isF = true;
-	    return;
+	    // updateTreeHeight(tree, node);
 	}
-    }
-
-    private void updateTreeHeight(AVLNode<T> rootNode) {
-	if (rootNode == null)
-	    return;
-
-	updateTreeHeight(rootNode.getLeftAVLNodes());
-
-	updateTreeHeight(rootNode.getRightAVLNodes());
-
-	int h = rootNode.hasNoneChild() ? 0 : 1;
-
-	rootNode.setCurrNodeHeight(updateHeight(rootNode) + h);
     }
 
     /**
@@ -290,8 +273,9 @@ class AVLTree<T> {
 	if (rootNode.hasRightChild()) {
 	    rightHeight = rootNode.getRightAVLNodes().getCurrNodeHeight();
 	}
-
-	return Math.max(leftHeight, rightHeight);
+	// the leaf node has 0 height
+	int h = rootNode.hasNoneChild() ? 0 : 1;
+	return Math.max(leftHeight, rightHeight) + h;
     }
 
     /**
@@ -299,7 +283,12 @@ class AVLTree<T> {
      * @param rootNode
      * @return
      */
-    private Integer updateBalanceFactor(AVLNode<T> rootNode) {
+    private Integer getBalanceFactor(AVLNode<T> rootNode) {
+
+	if (rootNode == null) {
+	    return 0;
+	}
+
 	int leftHeight = 0;
 	if (rootNode.hasLeftChild()) {
 	    leftHeight = rootNode.getLeftAVLNodes().getCurrNodeHeight() + 1;
@@ -314,7 +303,8 @@ class AVLTree<T> {
     }
 
     /**
-     * Rebalance the tree
+     * re-balance the tree
+     * 
      * @param rootAffectNode
      * @param insertedNode
      */
@@ -338,6 +328,30 @@ class AVLTree<T> {
     }
 
     /**
+     * re-balance the tree when delete node, this ideal, which calculate the
+     * re-balance case (RR, RL, LL, LR) base on only rootAffectNode - poe's
+     * suggestion({@link} https://poe.com/). You can check the case insert node when
+     * re-balance case base on both rootAffectNode and insertedNode data
+     * 
+     * @param rootAffectNode
+     *
+     */
+    private void reBalanceTreeWhenDelete(AVLNode<T> rootAffectNode) {
+
+	int factorAffectRoot = this.getBalanceFactor(rootAffectNode);
+
+	if (factorAffectRoot > 1 && this.getBalanceFactor(rootAffectNode.getRightAVLNodes()) >= 0) {
+	    RR(rootAffectNode);
+	} else if (factorAffectRoot < -1 && this.getBalanceFactor(rootAffectNode.getRightAVLNodes()) >= 0) {
+	    LR(rootAffectNode);
+	} else if (factorAffectRoot > 1 && this.getBalanceFactor(rootAffectNode.getLeftAVLNodes()) >= 0) {
+	    RL(rootAffectNode);
+	} else if (factorAffectRoot < -1 && this.getBalanceFactor(rootAffectNode.getLeftAVLNodes()) >= 0) {
+	    LL(rootAffectNode);
+	}
+    }
+
+    /**
      * 
      * @param rootAffectNode
      *            Z node, check the image
@@ -355,6 +369,10 @@ class AVLTree<T> {
 
 	rootAffectNode.setRightAVLNodes(newRightNode);
 	rootAffectNode.setLeftAVLNodes(childLeftRootAffectNode.getLeftAVLNodes());
+
+	// we need to re update current height of relevant nodes
+	newRightNode.setCurrNodeHeight(updateHeight(newRightNode));
+	rootAffectNode.setCurrNodeHeight(updateHeight(rootAffectNode));
     }
 
     /**
@@ -371,6 +389,11 @@ class AVLTree<T> {
 	Y.setLeftAVLNodes(T3);
 	X.setRightAVLNodes(Y);
 	Z.setRightAVLNodes(X);
+
+	// we need to re update current height of relevant nodes
+	Z.setCurrNodeHeight(updateHeight(Z));
+	Y.setCurrNodeHeight(updateHeight(Y));
+	X.setCurrNodeHeight(updateHeight(X));
 
 	this.RR(Z);
     }
@@ -391,10 +414,16 @@ class AVLTree<T> {
 	X.setLeftAVLNodes(Y);
 	Z.setLeftAVLNodes(X);
 
+	// we need to re update current height of relevant nodes
+	Z.setCurrNodeHeight(updateHeight(Z));
+	Y.setCurrNodeHeight(updateHeight(Y));
+	X.setCurrNodeHeight(updateHeight(X));
+
 	this.LL(Z);
     }
 
     /**
+     * Right Right case
      * 
      * @param rootAffectNode
      */
@@ -407,17 +436,51 @@ class AVLTree<T> {
 
 	rootAffectNode.setRightAVLNodes(childRightRootAffectNode.getRightAVLNodes());
 
-	AVLNode<T> newNode = new AVLNode<T>(data);
-	newNode.setLeftAVLNodes(childLeftRootAffectNode);
-	newNode.setRightAVLNodes(childRightRootAffectNode.getLeftAVLNodes());
+	AVLNode<T> newLeftNode = new AVLNode<T>(data);
+	newLeftNode.setLeftAVLNodes(childLeftRootAffectNode);
+	newLeftNode.setRightAVLNodes(childRightRootAffectNode.getLeftAVLNodes());
 
-	rootAffectNode.setLeftAVLNodes(newNode);
+	rootAffectNode.setLeftAVLNodes(newLeftNode);
+
+	// we need to re update current height of relevant nodes
+	newLeftNode.setCurrNodeHeight(updateHeight(newLeftNode));
+	rootAffectNode.setCurrNodeHeight(updateHeight(rootAffectNode));
 
     }
-    
-    // TODO need rebalance when delete node, must compliant the rule O(nlogn)
+
     /**
-     * delete node
+     * 
+     * @param nodes
+     * @return
+     */
+    public List<T> deleteNodes(List<T> nodes) {
+	List<T> res = new ArrayList<>();
+	for (T node : nodes) {
+	    System.out.println("delete node " + node);
+	    T delNode = deleteNode(node);
+	    this.dfsPrint(this.AVLNode, 1);
+	    if (delNode != null) {
+		res.add(delNode);
+	    }
+	}
+
+	return res;
+    }
+
+    // TODO we can improve the delete by using recursion then reduce the complexity
+    // from O(2*n*log(n)) to O(n*log(n))
+    // Although O(2*n*log(n)) = O(n*log(n)) when n come to infinite
+    /**
+     * delete node then re-balance the tree
+     * 
+     * The complexity: O(2*n*log(n))
+     * <p>
+     * - Delete node: O(n*log(n))
+     * <p>
+     * - re-balance node: O(n*log(n))
+     * <p>
+     * Note: we can improve the deleteNode() function using recursion
+     * 
      * @param node
      * @return
      */
@@ -445,27 +508,27 @@ class AVLTree<T> {
      */
     private T deleletNodeFrom(AVLNode<T> root, T node) {
 	List<AVLNode<T>> deletedNodes = this.findPreviousNode(null, root, node);
+	if (deletedNodes == null || deletedNodes.get(1) == null) {
+	    return null;
+	}
 	AVLNode<T> deletedNode = deletedNodes.get(1);
 	AVLNode<T> parentNode = deletedNodes.get(0);
 
-	if (deletedNode == null) {
-	    return null;
-	}
 	/**
-	 * If deleted node was not has any child, remove itself and then return parent
+	 * If deleted node did not has any child, remove itself and then return parent
 	 * node
 	 */
 	if (deletedNode.hasNoneChild() && parentNode != null) {
 	    if (parentNode.hasLeftChild() && this.compare(parentNode.getLeftAVLNodes().getData(), node) == 0) {
 		parentNode.setLeftAVLNodes(null);
-	    }
-	    if (parentNode.hasRightChild() && this.compare(parentNode.getRightAVLNodes().getData(), node) == 0) {
+	    } else if (parentNode.hasRightChild() && this.compare(parentNode.getRightAVLNodes().getData(), node) == 0) {
 		parentNode.setRightAVLNodes(null);
 	    }
+	    rebalanceDeleteNode(this.AVLNode, parentNode.getData());
 	    return node;
 	}
 	/**
-	 * find the largest node on the left side
+	 * find the largest node data on the left side
 	 */
 	if (deletedNode.hasLeftChild()) {
 	    AVLNode<T> parentDelNode = deletedNode;
@@ -476,10 +539,7 @@ class AVLTree<T> {
 	    }
 	    deletedNode.setData(leftNode.getData());
 
-	    AVLNode<T> data = null;
-	    if (leftNode.hasLeftChild()) {
-		data = leftNode.getLeftAVLNodes();
-	    }
+	    AVLNode<T> data = leftNode.hasLeftChild() ? leftNode.getLeftAVLNodes() : null;
 
 	    if (parentDelNode.hasLeftChild()
 		    && this.compare(parentDelNode.getLeftAVLNodes().getData(), leftNode.getData()) == 0) {
@@ -491,25 +551,25 @@ class AVLTree<T> {
 		parentDelNode.setRightAVLNodes(data);
 	    }
 
+	    rebalanceDeleteNode(this.AVLNode, parentDelNode.getData());
 	    return node;
 	}
 
 	/**
-	 * find the smallest node on the right side
+	 * find the smallest node data on the right side
 	 */
 	if (deletedNode.hasRightChild()) {
 	    AVLNode<T> parentDelNode = deletedNode;
 	    AVLNode<T> rightNode = deletedNode.getRightAVLNodes();
+
+	    // smallest is on left side
 	    while (rightNode.hasLeftChild()) {
 		parentDelNode = rightNode;
 		rightNode = rightNode.getLeftAVLNodes();
 	    }
-
+	    // replace the deleted node by the smallest data on left side
 	    deletedNode.setData(rightNode.getData());
-	    AVLNode<T> data = null;
-	    if (rightNode.hasRightChild()) {
-		data = rightNode.getRightAVLNodes();
-	    }
+	    AVLNode<T> data = rightNode.hasRightChild() ? rightNode.getRightAVLNodes() : null;
 
 	    if (parentDelNode.hasLeftChild()
 		    && this.compare(parentDelNode.getLeftAVLNodes().getData(), rightNode.getData()) == 0) {
@@ -521,10 +581,37 @@ class AVLTree<T> {
 		parentDelNode.setRightAVLNodes(data);
 	    }
 
+	    rebalanceDeleteNode(this.AVLNode, parentDelNode.getData());
 	    return node;
 	}
 
 	return null;
+    }
+
+    /**
+     * 
+     * @param rootNode
+     * @param searchData
+     */
+    private void rebalanceDeleteNode(AVLNode<T> rootNode, T searchData) {
+	if (rootNode == null) {
+	    return;
+	}
+
+	int compareFactor = this.compare(rootNode.getData(), searchData);
+	if (compareFactor < 0) {
+	    rebalanceDeleteNode(rootNode.getRightAVLNodes(), searchData);
+	} else if (compareFactor > 0) {
+	    rebalanceDeleteNode(rootNode.getLeftAVLNodes(), searchData);
+	}
+
+	rootNode.setCurrNodeHeight(updateHeight(rootNode));
+
+	int balanceFactor = getBalanceFactor(rootNode);
+
+	if (balanceFactor > 1 || balanceFactor < -1) {
+	    reBalanceTreeWhenDelete(rootNode);
+	}
     }
 
     /**
@@ -538,7 +625,7 @@ class AVLTree<T> {
 	// delete old node
 	deleteNode(oldNode);
 	// add new node
-	addNode(newNode);
+	insertNode(newNode);
     }
 
     /**
@@ -577,10 +664,10 @@ class AVLTree<T> {
      * 
      */
     public void print() {
-	System.out.println("####################### DFS ######################");
+	System.out.println("####################### Depth First Search ######################");
 	dfsPrint(this.AVLNode, 0);
 
-	System.out.println("####################### BFS ######################");
+	System.out.println("####################### Breadth First Search ######################");
 	bfsPrint(this.AVLNode);
     }
 
@@ -700,13 +787,13 @@ class AVLTree<T> {
 	    return;
 	if (level == 0) {
 	    System.out.println("---ROOT: V:" + node.getData() + "#H:" + node.getCurrNodeHeight() + "#BF:"
-		    + updateBalanceFactor(node));
+		    + getBalanceFactor(node));
 	} else {
 	    for (int ind = 0; ind <= level; ind++) {
 		System.out.print("----");
 	    }
-	    System.out.print("NODE: V:" + node.getData() + "#H:" + node.getCurrNodeHeight() + "#BF:"
-		    + updateBalanceFactor(node));
+	    System.out.print(
+		    "NODE: V:" + node.getData() + "#H:" + node.getCurrNodeHeight() + "#BF:" + getBalanceFactor(node));
 	    System.out.println();
 	}
 	dfsPrint(node.getLeftAVLNodes(), level + 1);
@@ -935,6 +1022,56 @@ public class SelfBalanceTree {
 	avlTree.print();
     }
 
+    public static void test6() {
+	AVLTree<Integer> avlTree = new AVLTree<Integer>();
+	avlTree.addNodes(Arrays.asList(138, 180, 113, 136, 169, 118, 28, 191, 150, 195, 152, 31, 123, 16, 185, 17, 45,
+		196, 11, 49, 94, 157, 129, 173, 154, 32, 12, 2, 117, 149, 194, 186, 59, 99, 142, 90, 170, 183, 57, 141,
+		127, 58, 122, 189, 66, 177, 104));
+	avlTree.print();
+
+	avlTree.insertNode(188);
+	avlTree.print();
+
+	avlTree.deleteNode(138);
+	avlTree.print();
+	avlTree.deleteNode(136);
+	avlTree.print();
+    }
+
+    public static void test7() {
+	AVLTree<Integer> avlTree = new AVLTree<Integer>();
+	avlTree.insertNode(1);
+	avlTree.insertNode(2);
+	avlTree.insertNode(3);
+	avlTree.insertNode(4);
+	avlTree.insertNode(5);
+	avlTree.insertNode(6);
+	avlTree.insertNode(7);
+	avlTree.insertNode(8);
+	avlTree.insertNode(9);
+	avlTree.insertNode(10);
+	avlTree.insertNode(16);
+	avlTree.insertNode(17);
+	avlTree.insertNode(18);
+	avlTree.insertNode(19);
+	avlTree.insertNode(20);
+
+	avlTree.print();
+
+	System.out.println("delete 4");
+	avlTree.deleteNode(4);
+	avlTree.print();
+
+	System.out.println("delete 8");
+	avlTree.deleteNode(8);
+	avlTree.print();
+
+	System.out.println("delete 2, 3, 1, 6, 5");
+	avlTree.deleteNodes(Arrays.asList(2, 3, 1, 6, 5));
+	avlTree.print();
+
+    }
+
     public static void main(String[] args) {
 	// System.out.println("\n++++++++++++++++++++++++++++++++1+++++++++++++++++++++++++++++++++++++");
 	// test1();
@@ -946,10 +1083,16 @@ public class SelfBalanceTree {
 	// test3();
 	//
 	// System.out.println("\n++++++++++++++++++++++++++++++++4+++++++++++++++++++++++++++++++++++++");
-	test4();
+	// test4();
 	//
-	// System.out.println("\n++++++++++++++++++++++++++++++++5+++++++++++++++++++++++++++++++++++++");
-	// test5();
+	System.out.println("\n++++++++++++++++++++++++++++++++5+++++++++++++++++++++++++++++++++++++");
+	test5();
+
+	System.out.println("\n++++++++++++++++++++++++++++++++6+++++++++++++++++++++++++++++++++++++");
+	test6();
+
+	System.out.println("\n++++++++++++++++++++++++++++++++7+++++++++++++++++++++++++++++++++++++");
+	test7();
     }
 
 }

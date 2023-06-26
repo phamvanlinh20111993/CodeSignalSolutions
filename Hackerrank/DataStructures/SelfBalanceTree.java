@@ -94,6 +94,7 @@ class Node1 {
 }
 
 public class SelfBalanceTree {
+    private static Node1 root = null;
 
     /**
      * 
@@ -124,6 +125,9 @@ public class SelfBalanceTree {
 
 	rootAffectNode.right = newRightNode;
 	rootAffectNode.left = childLeftRootAffectNode.left;
+	// re-update height
+	newRightNode.ht = updateHeight(newRightNode);
+	rootAffectNode.ht = updateHeight(rootAffectNode);
     }
 
     /**
@@ -140,6 +144,11 @@ public class SelfBalanceTree {
 	Y.left = T3;
 	X.right = Y;
 	Z.right = X;
+
+	// re update height
+	Z.ht = updateHeight(Z);
+	Y.ht = updateHeight(Y);
+	X.ht = updateHeight(X);
 
 	RR(Z);
     }
@@ -159,6 +168,11 @@ public class SelfBalanceTree {
 	Y.right = T2;
 	X.left = Y;
 	Z.left = X;
+
+	// re update height
+	Z.ht = updateHeight(Z);
+	Y.ht = updateHeight(Y);
+	X.ht = updateHeight(X);
 
 	LL(Z);
     }
@@ -183,6 +197,9 @@ public class SelfBalanceTree {
 
 	rootAffectNode.left = newNode;
 
+	// re update height
+	newNode.ht = updateHeight(newNode);
+	rootAffectNode.ht = updateHeight(rootAffectNode);
     }
 
     /**
@@ -237,23 +254,25 @@ public class SelfBalanceTree {
 	if (rootNode.right != null) {
 	    rightHeight = rootNode.right.ht;
 	}
-
-	return Math.max(leftHeight, rightHeight);
+	int h = rootNode.left == null && rootNode.right == null ? 0 : 1;
+	return Math.max(leftHeight, rightHeight) + h;
     }
 
-    private static void updateTreeHeight(Node1 rootNode) {
+    private static void updateTreeHeight(Node1 rootNode, Integer node) {
 
 	if (rootNode == null) {
 	    return;
 	}
 
-	updateTreeHeight(rootNode.left);
+	if (rootNode.val < node) {
+	    updateTreeHeight(rootNode.left, node);
+	}
 
-	updateTreeHeight(rootNode.right);
+	if (rootNode.val > node) {
+	    updateTreeHeight(rootNode.right, node);
+	}
 
-	int h = rootNode.left == null && rootNode.right == null ? 0 : 1;
-
-	rootNode.ht = updateHeight(rootNode) + h;
+	rootNode.ht = updateHeight(rootNode);
     }
 
     /**
@@ -261,8 +280,6 @@ public class SelfBalanceTree {
      * @param tree
      * @param node
      */
-    private static boolean isF = false;
-
     private static void insert1(Node1 tree, Integer node) {
 
 	int factor = compare(tree.val, node);
@@ -289,21 +306,13 @@ public class SelfBalanceTree {
 	    }
 	}
 
-	tree.ht = updateHeight(tree) + 1;
-
-	if (isF) {
-	    return;
-	}
+	tree.ht = updateHeight(tree);
 
 	int balanceFactor = updateBalanceFactor(tree);
 
 	if (balanceFactor > 1 || balanceFactor < -1) {
-	    // System.out.println("aaaaaa " + node);
 	    reBalanceTree(tree, node);
-	    updateTreeHeight(tree);
-	    // dfsPrint(tree, 1);
-	    isF = true;
-	    return;
+	//    updateTreeHeight(tree, node);
 	}
     }
 
@@ -315,9 +324,7 @@ public class SelfBalanceTree {
 	    return root;
 	}
 
-	isF = false;
 	insert1(root, val);
-//	updateTreeHeight(root);
 	return root;
     }
 
@@ -345,7 +352,7 @@ public class SelfBalanceTree {
     public static void test1() {
 	List<Integer> ds = Arrays.asList(14, 25, 21, 10, 23, 7, 26, 12, 30, 16);
 
-	Node1 root = null;
+	root = null;
 	for (Integer d : ds) {
 	    root = insert(root, d);
 	}
@@ -359,7 +366,7 @@ public class SelfBalanceTree {
     public static void test2() {
 	List<Integer> ds = Arrays.asList(3, 2, 4, 5);
 
-	Node1 root = null;
+	root = null;
 	for (Integer d : ds) {
 	    root = insert(root, d);
 	}
@@ -370,12 +377,31 @@ public class SelfBalanceTree {
 	dfsPrint(root, 1);
     }
 
+    public static void test3() {
+	List<Integer> ds = Arrays.asList(138, 180, 113, 136, 169, 118, 28, 191, 150, 195, 152, 31, 123, 16, 185, 17, 45,
+		196, 11, 49, 94, 157, 129, 173, 154, 32, 12, 2, 117, 149, 194, 186, 59, 99, 142, 90, 170, 183, 57, 141,
+		127, 58, 122, 189, 66, 177, 104);
+
+	root = null;
+	for (Integer d : ds) {
+	    root = insert(root, d);
+	}
+
+	dfsPrint(root, 1);
+	System.out.println("###############################################");
+	root = insert(root, 188);
+	dfsPrint(root, 1);
+    }
+
     public static void main(String[] args) {
 	System.out.println("########################### test 1 #########################");
 	test1();
 
 	System.out.println("########################### test 2 #########################");
 	test2();
+
+	System.out.println("########################### test 3 #########################");
+	test3();
     }
 
 }
