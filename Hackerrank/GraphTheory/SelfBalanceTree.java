@@ -157,9 +157,9 @@ class AVLNode<T> {
  */
 class AVLTree<T> {
 
-    private AVLNode<T> AVLNode = new AVLNode<T>();
+    protected AVLNode<T> AVLNode = new AVLNode<T>();
 
-    private final Comparator<T> comparator;
+    protected final Comparator<T> comparator;
 
     public AVLTree() {
 	comparator = null;
@@ -485,7 +485,7 @@ class AVLTree<T> {
      * @return
      */
     public T deleteNode(T node) {
-	return deleletNodeFrom(this.AVLNode, node);
+	return deleleNodeFrom(this.AVLNode, node);
     }
 
     /**
@@ -506,13 +506,21 @@ class AVLTree<T> {
      * @param node
      *            the node need to detach from the tree.
      */
-    private T deleletNodeFrom(AVLNode<T> root, T node) {
+    private T deleleNodeFrom(AVLNode<T> root, T node) {
 	List<AVLNode<T>> deletedNodes = this.findPreviousNode(null, root, node);
 	if (deletedNodes == null || deletedNodes.get(1) == null) {
 	    return null;
 	}
 	AVLNode<T> deletedNode = deletedNodes.get(1);
 	AVLNode<T> parentNode = deletedNodes.get(0);
+	
+	/**
+	 * remove root node itself
+	 */
+	if(deletedNode.hasNoneChild() && parentNode == null) {
+	    this.AVLNode = new AVLNode<T>();
+	    return node;
+	}
 
 	/**
 	 * If deleted node did not has any child, remove itself and then return parent
@@ -806,6 +814,8 @@ class AVLTree<T> {
      * @param level
      */
     private void bfsPrint(AVLNode<T> rootNode) {
+	
+	if(rootNode == null) return;
 
 	Queue<Tuples<AVLNode<T>, Integer>> queue = new LinkedList<Tuples<AVLNode<T>, Integer>>();
 	queue.add(new Tuples<>(rootNode, 0));
