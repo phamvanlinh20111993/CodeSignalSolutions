@@ -1,4 +1,4 @@
-// Not pass: 18/20 :((((
+// Not pass: 18/20 :((((, using Kruskal algorithm
 /**
  * Url:
  * https://app.codesignal.com/arcade/graphs-arcade/office-structures/9RNbcwe9XWrNKK6qw
