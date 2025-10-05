@@ -1,6 +1,6 @@
 
 // is same ?? : https://vn.spoj.com/problems/LATGACH/
-// I try to find formula for this but it seem very deficult, so i reference on internet:
+// I try to find formula for this but it seem very difficult, so i reference on internet:
 // https://math.stackexchange.com/questions/664113/count-the-ways-to-fill-a-4-times-n-board-with-dominoes
 // using dp top down to solve.
 // dp(n - 1) + 5 * dp(n - 2) + dp(n - 3) - dp(n - 4).
